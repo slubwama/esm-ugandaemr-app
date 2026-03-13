@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Search } from '@carbon/react';
-import styles from './app-search-bar.scss';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Search } from "@carbon/react";
+import styles from "./app-search-bar.scss";
 
-import { AssignedExtension, Extension, useAssignedExtensions } from '@openmrs/esm-framework';
-import { ComponentContext } from '@openmrs/esm-framework/src/internal';
+import {
+  AssignedExtension,
+  Extension,
+  useAssignedExtensions,
+} from "@openmrs/esm-framework";
+import { ComponentContext } from "@openmrs/esm-framework/src/internal";
 
-const appMenuItemSlot = 'app-menu-item-slot';
+const appMenuItemSlot = "app-menu-item-slot";
 
 interface AppSearchBarProps {
   onChange?: (searchTerm: string) => void;
@@ -18,8 +22,10 @@ interface AppSearchBarProps {
 const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
   ({ onChange, onClear, onSubmit, small }, ref) => {
     const { t } = useTranslation();
-    const [searchTerm, setSearchTerm] = useState('');
-    const menuItemExtensions = useAssignedExtensions(appMenuItemSlot) as AssignedExtension[];
+    const [searchTerm, setSearchTerm] = useState("");
+    const menuItemExtensions = useAssignedExtensions(
+      appMenuItemSlot
+    ) as AssignedExtension[];
 
     const handleChange = (val: string) => {
       setSearchTerm(val);
@@ -37,7 +43,7 @@ const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
 
     const filteredExtensions = menuItemExtensions
       .filter((extension) => {
-        const itemName = extension?.name ?? '';
+        const itemName = extension?.name ?? "";
         return itemName.toLowerCase().includes(searchTerm.toLowerCase());
       })
       .map((extension) => (
@@ -45,7 +51,7 @@ const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
           key={extension?.id}
           value={{
             moduleName: extension?.moduleName,
-            featureName: 'app-search-button',
+            featureName: "app-search-button",
             extension: {
               extensionId: extension?.id,
               extensionSlotName: appMenuItemSlot,
@@ -63,12 +69,12 @@ const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
           <Search
             autoFocus
             className={styles.appSearchInput}
-            closeButtonLabelText={t('clearSearch', 'Clear')}
+            closeButtonLabelText={t("clearSearch", "Clear")}
             labelText=""
             onChange={(event) => handleChange(event.target.value)}
             onClear={onClear}
-            placeholder={t('searchForApp', 'Search for an application')}
-            size={small ? 'sm' : 'lg'}
+            placeholder={t("searchForApp", "Search for an application")}
+            size={small ? "sm" : "lg"}
             value={searchTerm}
             ref={ref}
             data-testid="appSearchBar"
@@ -82,7 +88,7 @@ const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
                   key={extension?.id}
                   value={{
                     moduleName: extension?.moduleName,
-                    featureName: 'app-search-button',
+                    featureName: "app-search-button",
                     extension: {
                       extensionId: extension?.id,
                       extensionSlotName: appMenuItemSlot,
@@ -96,7 +102,7 @@ const AppSearchBar = React.forwardRef<HTMLInputElement, AppSearchBarProps>(
         </div>
       </>
     );
-  },
+  }
 );
 
 export default AppSearchBar;
