@@ -1,5 +1,5 @@
-import { OpenmrsResource } from '@openmrs/esm-framework';
-import { DataSource } from '@openmrs/esm-form-engine-lib';
+import { type OpenmrsResource } from '@openmrs/esm-framework';
+import { type DataSource } from '@openmrs/esm-form-engine-lib';
 import { getCohortCategorization } from './custom-apis';
 
 export class DSDMCategorizationDatasource implements DataSource<OpenmrsResource> {
@@ -8,7 +8,7 @@ export class DSDMCategorizationDatasource implements DataSource<OpenmrsResource>
   }
   fetchData(searchTerm: string, config?: Record<string, any>): Promise<any[]> {
     return getCohortCategorization(config?.cohortUuid).then((response) => {
-      let data = [];
+      const data = [];
       response?.data?.results?.map((dataItem) => {
         data.push({
           display: dataItem?.name,

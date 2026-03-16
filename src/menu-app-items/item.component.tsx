@@ -1,6 +1,6 @@
 import { ClickableTile } from '@carbon/react';
 import React from 'react';
-import { CarbonIconType } from '@carbon/react/icons';
+import { type CarbonIconType } from '@carbon/react/icons';
 
 interface ItemTileProps {
   title: string;

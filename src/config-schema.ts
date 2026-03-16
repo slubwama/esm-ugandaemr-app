@@ -14,6 +14,6 @@ export const configSchema = {
 };
 
 export type Config = {
-  nhfrGlobalPropertyValueName: String;
-  nhcrUrl: String;
+  nhfrGlobalPropertyValueName: string;
+  nhcrUrl: string;
 };

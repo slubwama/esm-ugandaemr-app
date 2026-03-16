@@ -4,7 +4,7 @@ import { Search } from "@carbon/react";
 import styles from "./app-search-bar.scss";
 
 import {
-  AssignedExtension,
+  type AssignedExtension,
   Extension,
   useAssignedExtensions,
 } from "@openmrs/esm-framework";

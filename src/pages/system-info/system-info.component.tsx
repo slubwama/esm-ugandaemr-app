@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Column,
   Grid,
@@ -12,42 +12,56 @@ import {
   TableBody,
   TableCell,
   Tile,
-} from '@carbon/react';
-import { ErrorState, UserHasAccess, showNotification, showSnackbar } from '@openmrs/esm-framework';
-import { updatePropertyValue, useGetSystemInformation, useRetrieveFacilityCode } from './system-info.resources';
-import styles from './system-info.scss';
-import coatOfArms from '../../images/coat_of_arms.png';
-import UpdateFacilityCode from './update-facility-code-button.component';
+} from "@carbon/react";
+import {
+  ErrorState,
+  UserHasAccess,
+  showNotification,
+  showSnackbar,
+} from "@openmrs/esm-framework";
+import {
+  updatePropertyValue,
+  useGetSystemInformation,
+  useRetrieveFacilityCode,
+} from "./system-info.resources";
+import styles from "./system-info.scss";
+import coatOfArms from "../../images/coat_of_arms.png";
+import UpdateFacilityCode from "./update-facility-code-button.component";
 import {
   NHFRIdentifier,
   PRIVILEGE_UPDATE_FACILITY_CODE,
   systemInstallationDate,
   systemInstallationTime,
-} from '../../constants';
+} from "../../constants";
 
 interface FacilityCodeDetails {
   value?: string;
 }
 
-const OverallSystemInfo = ({ buildInfo, emrVersion, facilityCodeDetails, setFacilityCodeDetails }) => {
+const OverallSystemInfo = ({
+  buildInfo,
+  emrVersion,
+  facilityCodeDetails,
+  setFacilityCodeDetails,
+}) => {
   const { t } = useTranslation();
   const buildDateTime =
     buildInfo && buildInfo[`${systemInstallationDate}`]
       ? `${buildInfo[`${systemInstallationDate}`]}, ${buildInfo[`${systemInstallationTime}`]}`
-      : '-';
+      : "-";
 
   return (
-    <Grid className={styles['overall-info-card']}>
-      <Column className={styles['info-title']}>
+    <Grid className={styles["overall-info-card"]}>
+      <Column className={styles["info-title"]}>
         <Column>
-          <p>{t('governmentOfUganda', 'Government of Uganda')}</p>
-          <p>{t('ministryOfHealth', 'Ministry of Health')}</p>
+          <p>{t("governmentOfUganda", "Government of Uganda")}</p>
+          <p>{t("ministryOfHealth", "Ministry of Health")}</p>
         </Column>
         <Column>
           <img src={coatOfArms} alt="Govt of Uganda Coat of Arms" height={50} />
         </Column>
       </Column>
-      <Column className={styles['info-body']}>
+      <Column className={styles["info-body"]}>
         <span>Uganda EMR+ Version</span>
         <span>{emrVersion}</span>
         <span>SPA Version</span>
@@ -55,7 +69,9 @@ const OverallSystemInfo = ({ buildInfo, emrVersion, facilityCodeDetails, setFaci
         <span>Build date time</span>
         <span>{buildDateTime}</span>
         <span>Facility code</span>
-        <span>{facilityCodeDetails.value === null ? '-' : facilityCodeDetails.value}</span>
+        <span>
+          {facilityCodeDetails.value === null ? "-" : facilityCodeDetails.value}
+        </span>
       </Column>
       <div className={styles.divUpdateContent}>
         <UserHasAccess privilege={PRIVILEGE_UPDATE_FACILITY_CODE}>
@@ -74,8 +90,8 @@ const OverallSystemInfo = ({ buildInfo, emrVersion, facilityCodeDetails, setFaci
 function SystemInfoTable({ moduleInfo, error, loading }): React.JSX.Element {
   const { t } = useTranslation();
 
-  const defineTableRows = (obj: {}) => {
-    let arr = [];
+  const defineTableRows = (obj: any) => {
+    const arr = [];
     Object.keys(obj).forEach((key, i) => {
       return arr.push({
         id: i,
@@ -86,35 +102,51 @@ function SystemInfoTable({ moduleInfo, error, loading }): React.JSX.Element {
     return arr;
   };
 
-  const tableRows = React.useMemo(() => defineTableRows(moduleInfo), [moduleInfo]);
+  const tableRows = React.useMemo(
+    () => defineTableRows(moduleInfo),
+    [moduleInfo],
+  );
   const tableHeaders = [
     {
-      header: 'Module Name',
-      key: 'module_name',
+      header: "Module Name",
+      key: "module_name",
     },
     {
-      header: 'Version Number',
-      key: 'version_number',
+      header: "Version Number",
+      key: "version_number",
     },
   ];
 
   if (loading) {
-    return <DataTableSkeleton className={styles['system-info-table']} role="progressbar" />;
+    return (
+      <DataTableSkeleton
+        className={styles["system-info-table"]}
+        role="progressbar"
+      />
+    );
   }
   if (error) {
     return (
-      <ErrorState headerTitle={t('errorFetchingSytemInformation', 'Error fetching system information')} error={error} />
+      <ErrorState
+        headerTitle={t(
+          "errorFetchingSytemInformation",
+          "Error fetching system information",
+        )}
+        error={error}
+      />
     );
   }
   if (moduleInfo) {
     return (
       <DataTable rows={tableRows} headers={tableHeaders}>
         {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-          <Table {...getTableProps()} className={styles['system-info-table']}>
+          <Table {...getTableProps()} className={styles["system-info-table"]}>
             <TableHead>
               <TableRow>
                 {headers.map((header) => (
-                  <TableHeader {...getHeaderProps({ header })}>{header.header}</TableHeader>
+                  <TableHeader {...getHeaderProps({ header })}>
+                    {header.header}
+                  </TableHeader>
                 ))}
               </TableRow>
             </TableHead>
@@ -138,16 +170,17 @@ const SystemInfoPage = () => {
   const { t } = useTranslation();
   const [moduleInfo, setModuleInfo] = useState({});
   const [buildInfo, setBuildInfo] = useState({});
-  const [emrVersion, setEMRVersion] = useState('4.0');
+  const [emrVersion, setEMRVersion] = useState("4.0");
   const { systemInfo, isError, isLoading } = useGetSystemInformation();
-  const [facilityCodeDetails, setFacilityCodeDetails] = useState<FacilityCodeDetails>({ value: null });
+  const [facilityCodeDetails, setFacilityCodeDetails] =
+    useState<FacilityCodeDetails>({ value: null });
 
   const { facilityIds } = useRetrieveFacilityCode();
 
   useEffect(() => {
     if (facilityIds && facilityIds.length) {
       setFacilityCodeDetails({
-        value: facilityIds[0]['value'],
+        value: facilityIds[0]["value"],
       });
     }
   }, [facilityIds]);
@@ -158,16 +191,22 @@ const SystemInfoPage = () => {
         (response) => {
           showSnackbar({
             isLowContrast: true,
-            kind: 'success',
-            title: t('Updating Facility Code', 'Updating Facility Code'),
-            subtitle: t('UpdatingFacilityCode', `Updated Facility Code ${response?.value}`),
+            kind: "success",
+            title: t("Updating Facility Code", "Updating Facility Code"),
+            subtitle: t(
+              "UpdatingFacilityCode",
+              `Updated Facility Code ${response?.value}`,
+            ),
             autoClose: true,
           });
         },
         (error) => {
           showNotification({
-            title: t('errorUpdatingFacilityCode', 'Could not update facility code'),
-            kind: 'error',
+            title: t(
+              "errorUpdatingFacilityCode",
+              "Could not update facility code",
+            ),
+            kind: "error",
             critical: true,
             description: error?.message,
             millis: 3000,
@@ -185,16 +224,20 @@ const SystemInfoPage = () => {
 
   useEffect(() => {
     if (systemInfo) {
-      const moduleInformation = { ...systemInfo['systemInfo']['SystemInfo.title.moduleInformation'] };
-      delete moduleInformation['SystemInfo.Module.repositoryPath'];
+      const moduleInformation = {
+        ...systemInfo["systemInfo"]["SystemInfo.title.moduleInformation"],
+      };
+      delete moduleInformation["SystemInfo.Module.repositoryPath"];
       setModuleInfo(moduleInformation);
-      setBuildInfo(systemInfo['systemInfo']['SystemInfo.title.openmrsInformation']);
+      setBuildInfo(
+        systemInfo["systemInfo"]["SystemInfo.title.openmrsInformation"],
+      );
     }
   }, [systemInfo]);
 
   useEffect(() => {
     if (moduleInfo) {
-      setEMRVersion(moduleInfo['UgandaEMR']);
+      setEMRVersion(moduleInfo["UgandaEMR"]);
     }
   }, [moduleInfo]);
 
@@ -206,7 +249,11 @@ const SystemInfoPage = () => {
         facilityCodeDetails={facilityCodeDetails}
         setFacilityCodeDetails={setFacilityCodeDetails}
       />
-      <SystemInfoTable moduleInfo={moduleInfo} error={isError} loading={isLoading} />
+      <SystemInfoTable
+        moduleInfo={moduleInfo}
+        error={isError}
+        loading={isLoading}
+      />
     </Tile>
   );
 };

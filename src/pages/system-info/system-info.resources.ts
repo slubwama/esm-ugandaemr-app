@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { systemInfo } from './system-info.types';
+import { type systemInfo } from './system-info.types';
 import { NHFRIdentifier } from '../../constants';
 
 type facilityRequest = {
