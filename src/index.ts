@@ -15,12 +15,13 @@ import dispensingAppMenu from "./menu-app-items/despensing-app-menu-item/dispens
 import bedManagementAppMenu from "./menu-app-items/bed-mgt-item/bed-mgt.component";
 import suppliesDispensingAppMenu from "./menu-app-items/supply-dispensing-app-item/supply-dispensing.component";
 import { createHomeDashboardLink } from "./create-dashboard-link";
+
 import ClinicalPatientSummary from "./pages/clinical-patient-summary/clinical-patient-summary.component";
-import ClinicalPatientSummaryTabs from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/clinical-patient-summary-tabs.component";
-import SubjectiveFindingsComponent from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/subjective-findings.component";
-import ObjectiveFindingsComponent from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/objective-findings.component";
-import TreatmentPlanComponent from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/treatment-plan.component";
-import AssessmentComponent from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/assessment.component";
+import ClinicalPatientSummaryTabsView from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/clinical-patient-summary-tabs.component";
+import SubjectiveFindingsView from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/subjective-findings.component";
+import ObjectiveFindingsView from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/objective-findings.component";
+import TreatmentPlanView from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/treatment-plan.component";
+import AssessmentView from "./pages/clinical-patient-summary/clinical-patient-summary-tabs/assessment.component";
 
 import { DSDMCategorizationDatasource } from "./custom-expressions/custom-expressions";
 import AppSearchLaunch from "./app-menu/app-search-icon/app-search-icon.component";
@@ -39,50 +40,24 @@ const options = {
   moduleName,
 };
 
-// Menu App Items
-export const formBuilderAppMenuItem = getSyncLifecycle(
-  formBuilderAppMenu,
-  options,
-);
-export const systemInfoAppMenuItem = getSyncLifecycle(
-  systemInfoAppMenu,
-  options,
-);
-export const legacyAdminAppMenuItem = getSyncLifecycle(
-  legacyAdminAppMenu,
-  options,
-);
-export const cohortBuilderAppMenuItem = getSyncLifecycle(
-  cohortBuilderAppMenu,
-  options,
-);
-export const formRenderTestAppMenuItem = getSyncLifecycle(
-  formRenderTestAppMenu,
-  options,
-);
-export const dispensingAppMenuItem = getSyncLifecycle(
-  dispensingAppMenu,
-  options,
-);
-export const bedManagementMenuItem = getSyncLifecycle(
-  bedManagementAppMenu,
-  options,
-);
-export const suppliesDispensingMenuItem = getSyncLifecycle(
-  suppliesDispensingAppMenu,
-  options,
-);
+export const formBuilderAppMenuItem = getSyncLifecycle(formBuilderAppMenu, options);
+export const systemInfoAppMenuItem = getSyncLifecycle(systemInfoAppMenu, options);
+export const legacyAdminAppMenuItem = getSyncLifecycle(legacyAdminAppMenu, options);
+export const cohortBuilderAppMenuItem = getSyncLifecycle(cohortBuilderAppMenu, options);
+export const formRenderTestAppMenuItem = getSyncLifecycle(formRenderTestAppMenu, options);
+export const dispensingAppMenuItem = getSyncLifecycle(dispensingAppMenu, options);
+export const bedManagementMenuItem = getSyncLifecycle(bedManagementAppMenu, options);
+export const suppliesDispensingMenuItem = getSyncLifecycle(suppliesDispensingAppMenu, options);
 
 export function startupApp() {
   defineConfigSchema(moduleName, configSchema);
 
   registerCustomDataSource({
     name: "dsdm_categorization_datasource",
-    load: () => {
-      return Promise.resolve({
+    load: () =>
+      Promise.resolve({
         default: new DSDMCategorizationDatasource(),
-      });
-    },
+      }),
   });
 }
 
@@ -120,34 +95,35 @@ export const dispensingDashboardLink = getSyncLifecycle(
   options,
 );
 
-// Patient Chart
-
 export const clinicalPatientSummary = getSyncLifecycle(
   ClinicalPatientSummary,
   options,
 );
 
-export const clincialPatientSummaryTabs = getSyncLifecycle(
-  ClinicalPatientSummaryTabs,
+export const ClinicalPatientSummaryTabs = getSyncLifecycle(
+  ClinicalPatientSummaryTabsView,
   options,
 );
 
-export const subjectiveFindingsSection = getSyncLifecycle(
-  SubjectiveFindingsComponent,
+export const SubjectiveFindingsComponent = getSyncLifecycle(
+  SubjectiveFindingsView,
   options,
 );
 
-export const objectiveFindingsSection = getSyncLifecycle(
-  ObjectiveFindingsComponent,
+export const ObjectiveFindingsComponent = getSyncLifecycle(
+  ObjectiveFindingsView,
   options,
 );
 
-export const treatmentPlanSection = getSyncLifecycle(
-  TreatmentPlanComponent,
+export const TreatmentPlanComponent = getSyncLifecycle(
+  TreatmentPlanView,
   options,
 );
 
-export const assessmentSection = getSyncLifecycle(AssessmentComponent, options);
+export const AssessmentComponent = getSyncLifecycle(
+  AssessmentView,
+  options,
+);
 
 export const appMenuButton = getSyncLifecycle(AppSearchLaunch, options);
 

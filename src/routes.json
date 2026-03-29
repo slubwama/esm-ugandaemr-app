@@ -1,209 +1,139 @@
 {
-    "$schema": "https://json.openmrs.org/routes.schema.json",
-    "backendDependencies": {
-        "fhir2": ">=1.2",
-        "webservices.rest": "^2.24.0"
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": "^2.24.0"
+  },
+  "pages": [
+    {
+      "component": "systemInfoPage",
+      "route": "about"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "hiv-care-and-treatment-ext",
+      "slot": "patient-summary-dashboard-slot",
+      "component": "clinicalPatientSummary"
     },
-    "pages": [
-        {
-            "component": "systemInfoPage",
-            "route": "about"
-        },
-        {
-            "component": "dispensing",
-            "route": "dispensing"
-        }
-    ],
-    "extensions": [
-        {
-            "name": "clinical-views-divider",
-            "slot": "patient-chart-dashboard-slot",
-            "component": "clinicalViewsDivider",
-            "order": 20
-        },
-        {
-            "name": "hiv-care-and-treatment-ext",
-            "slot": "patient-summary-dashboard-slot",
-            "component": "clinicalPatientSummary"
-        },
-        {
-            "name": "hiv-care-and-treatment-treatment-summary-ext",
-            "slot": "patient-treatment-dashboard-slot",
-            "component": "treatmentDashboard"
-        },
-        {
-            "name": "hiv-care-and-treatment-general-counselling-summary-ext",
-            "slot": "patient-general-counselling-dashboard-slot",
-            "component": "generalCounsellingDashboard"
-        },
-        {
-            "name": "hiv-testing-services-ext",
-            "slot": "patient-hts-dashboard-slot",
-            "component": "htsDashboard"
-        },
-        {
-            "name": "vmmc-services-ext",
-            "slot": "patient-smc-dashboard-slot",
-            "component": "vmmcDashboard"
-        },
-        {
-            "name": "ds-tb-summary-ext",
-            "slot": "patient-ds-tb-dashboard-slot",
-            "component": "dstbDashboard"
-        },
-        {
-            "name": "dr-tb-summary-ext",
-            "slot": "patient-dr-tb-dashboard-slot",
-            "component": "drtbDashboard"
-        },
-        {
-            "name": "eid-summary-ext",
-            "slot": "patient-eid-program-summary-dashboard-slot",
-            "component": "eidDashboard"
-        },
-        {
-            "name": "eid-encounter-ext",
-            "slot": "patient-eid-program-dashboard-slot",
-            "component": "eidDashboard"
-        },
-        {
-            "name": "dispensing-dashboard-link",
-            "slot": "homepage-dashboard-slot",
-            "component": "dispensingDashboardLink",
-            "meta": {
-                "name": "dispensing",
-                "slot": "dispensing-dashboard-slot",
-                "title": "Pharmacy"
-            }
-        },
-        {
-            "name": "clincial-patient-link",
-            "slot": "patient-chart-dashboard-slot",
-            "component": "clinicalPatientDashboardLink",
-            "order": 15,
-            "meta": {
-                "slot": "clinical-patient-summary-slot",
-                "path": "clinical-patient-dashboard",
-                "title": "Clinical Patient Summary",
-                "columns": 1
-            }
-        },
-        {
-            "name": "clinical-patient-summary",
-            "slot": "clinical-patient-summary-slot",
-            "component": "clinicalPatientSummary"
-        },
-        {
-            "name": "subjective-findings-datalist",
-            "component": "SubjectiveFindings"
-        },
-        {
-            "name": "objective-findings-datalist",
-            "component": "ObjectiveFindings"
-        },
-        {
-            "name": "clinical-patient-summary-tabs",
-            "component": "ClinicalPatientSummaryTabs"
-        },
-        {
-            "name": "subjective-findings-section",
-            "component": "SubjectiveFindingsComponent"
-        },
-        {
-            "name": "objective-findings-section",
-            "component": "ObjectiveFindingsComponent"
-        },
-        {
-            "name": "treatment-plan-section",
-            "component": "TreatmentPlanComponent"
-        },
-        {
-            "name": "assessment-section",
-            "component": "AssessmentComponent"
-        },
-        {
-            "name": "bed-mgt-app-menu-item",
-            "component": "bedManagementMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Bed Management"
-            }
-        },
-        {
-          "name": "supply-dispensing-app-menu-item",
-          "component": "suppliesDispensingMenuItem",
-          "slot": "app-menu-item-slot",
-          "meta": {
-            "name": "Supplies Dispensing"
-          }
-        },
-        {
-            "name": "form-builder-app-menu-item",
-            "component": "formBuilderAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Form Builder"
-            }
-        },
-        {
-            "name": "system-info-app-menu-item",
-            "component": "systemInfoAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "System Info"
-            }
-        },
-        {
-            "name": "legacy-admin-app-menu-item",
-            "component": "legacyAdminAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Legacy Admin"
-            }
-        },
-        {
-            "name": "cohort-builder-app-menu-item",
-            "component": "cohortBuilderAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Cohort Builder"
-            }
-        },
-        {
-            "name": "form-render-test-app-menu-item",
-            "component": "formRenderTestAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Form Render Test"
-            }
-        },
-        {
-            "name": "dispensing-app-menu-item",
-            "component": "dispensingAppMenuItem",
-            "slot": "app-menu-item-slot",
-            "meta": {
-                "name": "Dispensing"
-            }
-        },
-        {
-            "name": "app-search-button",
-            "component": "appMenuButton",
-            "slot": "top-nav-actions-slot",
-            "online": true,
-            "offline": true
-        },
-        {
-            "name": "notifications-menu-button",
-            "component": "notificationsMenuButton",
-            "slot": "top-nav-actions-slot",
-            "online": true,
-            "offline": true
-        }
-    ],
-    "modals": [
-        {
-            "name": "retrieve-facility-code-modal",
-            "component": "retrieveFacilityCodeModal"
-        }
-    ]
+    {
+      "name": "dispensing-dashboard-link",
+      "slot": "homepage-dashboard-slot",
+      "component": "dispensingDashboardLink",
+      "meta": {
+        "name": "dispensing",
+        "slot": "dispensing-dashboard-slot",
+        "title": "Pharmacy"
+      }
+    },
+    {
+      "name": "clinical-patient-summary",
+      "slot": "clinical-patient-summary-slot",
+      "component": "clinicalPatientSummary"
+    },
+    {
+      "name": "clinical-patient-summary-tabs",
+      "component": "ClinicalPatientSummaryTabs"
+    },
+    {
+      "name": "subjective-findings-section",
+      "component": "SubjectiveFindingsComponent"
+    },
+    {
+      "name": "objective-findings-section",
+      "component": "ObjectiveFindingsComponent"
+    },
+    {
+      "name": "treatment-plan-section",
+      "component": "TreatmentPlanComponent"
+    },
+    {
+      "name": "assessment-section",
+      "component": "AssessmentComponent"
+    },
+    {
+      "name": "bed-mgt-app-menu-item",
+      "component": "bedManagementMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Bed Management"
+      }
+    },
+    {
+      "name": "supply-dispensing-app-menu-item",
+      "component": "suppliesDispensingMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Supplies Dispensing"
+      }
+    },
+    {
+      "name": "form-builder-app-menu-item",
+      "component": "formBuilderAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Form Builder"
+      }
+    },
+    {
+      "name": "system-info-app-menu-item",
+      "component": "systemInfoAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "System Info"
+      }
+    },
+    {
+      "name": "legacy-admin-app-menu-item",
+      "component": "legacyAdminAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Legacy Admin"
+      }
+    },
+    {
+      "name": "cohort-builder-app-menu-item",
+      "component": "cohortBuilderAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Cohort Builder"
+      }
+    },
+    {
+      "name": "form-render-test-app-menu-item",
+      "component": "formRenderTestAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Form Render Test"
+      }
+    },
+    {
+      "name": "dispensing-app-menu-item",
+      "component": "dispensingAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Dispensing"
+      }
+    },
+    {
+      "name": "app-search-button",
+      "component": "appMenuButton",
+      "slot": "top-nav-actions-slot",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "notifications-menu-button",
+      "component": "notificationsMenuButton",
+      "slot": "top-nav-actions-slot",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "modals": [
+    {
+      "name": "retrieve-facility-code-modal",
+      "component": "retrieveFacilityCodeModal"
+    }
+  ]
 }
