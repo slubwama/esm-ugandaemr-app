@@ -80,6 +80,7 @@ const SystemAdminPage: React.FC = () => {
 
   const renderContent = () => {
     switch (activeSection) {
+      case 'overview':
       case 'sync-dashboard':
         return <SyncDashboardContent />;
       case 'sync-profiles':
@@ -95,33 +96,7 @@ const SystemAdminPage: React.FC = () => {
       case 'sms-settings':
         return <SMSSettingsContent />;
       default:
-        return (
-          <div className={styles.overviewContent}>
-            <div className={styles.overviewHeader}>
-              <h2>{t('systemAdmin', 'System Administration')}</h2>
-              <p>{t('systemAdminDesc', 'Manage system configuration, sync operations, and scheduled tasks')}</p>
-            </div>
-            <div className={styles.overviewCards}>
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.id}
-                    className={styles.overviewCard}
-                    onClick={() => setActiveSection(item.id)}
-                  >
-                    <div className={styles.cardIcon}>
-                      <Icon size={32} />
-                    </div>
-                    <h3>{item.label}</h3>
-                    <p>{item.description}</p>
-                    <ChevronRight size={20} className={styles.cardArrow} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
+        return <SyncDashboardContent />;
     }
   };
 
