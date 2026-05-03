@@ -1,0 +1,238 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/type';
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.smsSettingsContent {
+  padding: 0;
+  width: 100%;
+}
+
+.settingsContainer {
+  display: grid;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.settingsSection {
+  background-color: colors.$gray-10;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid colors.$gray-30;
+
+  h2 {
+    @include type.type-style('heading-03');
+    color: colors.$gray-100;
+    margin: 0;
+  }
+
+  .sectionDescription {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin-top: 0.25rem;
+  }
+}
+
+.settingsForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    @include type.type-style('label-01');
+    color: colors.$gray-100;
+    font-weight: 600;
+  }
+
+  .helperText {
+    @include type.type-style('body-compact-01');
+    color: colors.$gray-60;
+    font-size: 0.875rem;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  select {
+    min-height: 3rem;
+  }
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.25rem;
+
+  input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  label {
+    @include type.type-style('body-01');
+    color: colors.$gray-100;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.actionsBar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid colors.$gray-30;
+  margin-top: 1rem;
+}
+
+.statusIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &.success {
+    background-color: colors.$green-10;
+    color: colors.$green-60;
+  }
+
+  &.error {
+    background-color: colors.$red-10;
+    color: colors.$red-60;
+  }
+
+  &.warning {
+    background-color: colors.$yellow-10;
+    color: colors.$yellow-60;
+  }
+
+  &.info {
+    background-color: colors.$blue-10;
+    color: colors.$blue-60;
+  }
+}
+
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  .statusDot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: colors.$gray-60;
+
+    &.connected {
+      background-color: colors.$green-60;
+      box-shadow: 0 0 0 0.125rem colors.$green-20;
+    }
+
+    &.disconnected {
+      background-color: colors.$red-60;
+      box-shadow: 0 0 0 0.125rem colors.$red-20;
+    }
+
+    &.testing {
+      background-color: colors.$yellow-60;
+      box-shadow: 0 0 0 0.125rem colors.$yellow-20;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.configurationCard {
+  background-color: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid colors.$gray-20;
+
+    h3 {
+      @include type.type-style('heading-04');
+      color: colors.$gray-100;
+      margin: 0;
+    }
+  }
+
+  .cardContent {
+    display: grid;
+    gap: 1rem;
+  }
+}
+
+.lastSyncInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: colors.$blue-10;
+  border-left: 4px solid colors.$blue-60;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+
+  .infoIcon {
+    color: colors.$blue-60;
+  }
+
+  .infoContent {
+    flex: 1;
+
+    .infoLabel {
+      @include type.type-style('label-01');
+      color: colors.$gray-70;
+      font-weight: 600;
+    }
+
+    .infoValue {
+      @include type.type-style('body-01');
+      color: colors.$gray-100;
+      margin-top: 0.25rem;
+    }
+  }
+}

@@ -8,6 +8,10 @@
     {
       "component": "systemInfoPage",
       "route": "about"
+    },
+    {
+      "component": "systemAdminPage",
+      "route": "system-admin"
     }
   ],
   "extensions": [
@@ -84,6 +88,14 @@
       }
     },
     {
+      "name": "system-admin-app-menu-item",
+      "component": "systemAdminAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "System Admin"
+      }
+    },
+    {
       "name": "legacy-admin-app-menu-item",
       "component": "legacyAdminAppMenuItem",
       "slot": "app-menu-item-slot",
@@ -134,6 +146,14 @@
     {
       "name": "retrieve-facility-code-modal",
       "component": "retrieveFacilityCodeModal"
+    },
+    {
+      "name": "profile-detail-modal",
+      "component": "profileDetailModal"
+    },
+    {
+      "name": "tasktype-detail-modal",
+      "component": "taskTypeDetailModal"
     }
   ]
 }

@@ -30,3 +30,9 @@ export const REGISTRY_REGIONS_URL = 'https://nhfr-staging-api.planetsystems.co/n
 
 // privileges
 export const PRIVILEGE_UPDATE_FACILITY_CODE = 'Update Facility Code';
+export const PRIVILEGE_VIEW_FHIR_PROFILES = 'View FHIR Profiles';
+export const PRIVILEGE_MANAGE_FHIR_PROFILES = 'Manage FHIR Profiles';
+export const PRIVILEGE_VIEW_SYNC_TASK_TYPES = 'View Sync Task Types';
+export const PRIVILEGE_MANAGE_SYNC_TASK_TYPES = 'Manage Sync Task Types';
+export const PRIVILEGE_VIEW_SYNC_LOGS = 'View Sync Logs';
+export const PRIVILEGE_MANAGE_SYNC_LOGS = 'Manage Sync Logs';

@@ -1,0 +1,48 @@
+.modalContent {
+  padding: 1rem 0;
+}
+
+.formField {
+  margin-bottom: 1.5rem;
+}
+
+.testButton {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.testResult {
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.success {
+  color: #24a148;
+  font-weight: 500;
+}
+
+.error {
+  color: #da1e28;
+  font-weight: 500;
+}
+
+.resourceTypesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.resourceCheckbox {
+  margin: 0;
+}
+
+.errorMessage {
+  color: #da1e28;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.required {
+  color: #da1e28;
+}

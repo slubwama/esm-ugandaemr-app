@@ -1,0 +1,487 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/type';
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/layout';
+
+.viralLoadUploadContent {
+  padding: 0;
+  width: 100%;
+}
+
+.uploadContainer {
+  display: grid;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.uploadHeader {
+  margin-bottom: 1rem;
+
+  h1 {
+    @include type.type-style('heading-02');
+    color: colors.$gray-100;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .uploadDescription {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin: 0;
+  }
+}
+
+.uploadSection {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.uploadArea {
+  background: colors.$white;
+  border: 2px dashed colors.$gray-40;
+  border-radius: 0.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: colors.$blue-60;
+    background-color: colors.$blue-10;
+  }
+
+  &.dragActive {
+    border-color: colors.$blue-60;
+    background-color: colors.$blue-10;
+    border-style: solid;
+  }
+
+  &.hasError {
+    border-color: colors.$red-60;
+    background-color: colors.$red-10;
+  }
+
+  &.hasSuccess {
+    border-color: colors.$green-60;
+    background-color: colors.$green-10;
+  }
+
+  .uploadIcon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: colors.$gray-10;
+    border-radius: 50%;
+    color: colors.$gray-100;
+  }
+
+  .uploadTitle {
+    @include type.type-style('heading-03');
+    color: colors.$gray-100;
+    margin-bottom: 0.5rem;
+  }
+
+  .uploadDescription {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin-bottom: 1rem;
+  }
+
+  .uploadHint {
+    @include type.type-style('body-compact-01');
+    color: colors.$gray-60;
+    margin-bottom: 1.5rem;
+  }
+
+  .fileInput {
+    display: none;
+  }
+
+  .uploadButton {
+    margin-bottom: 1rem;
+  }
+
+  .selectedFile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background-color: colors.$gray-10;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+
+    .fileInfo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .fileIcon {
+        color: colors.$blue-60;
+      }
+
+      .fileDetails {
+        .fileName {
+          @include type.type-style('body-01');
+          color: colors.$gray-100;
+          font-weight: 600;
+        }
+
+        .fileSize {
+          @include type.type-style('body-compact-01');
+          color: colors.$gray-60;
+        }
+      }
+    }
+
+    .removeButton {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.instructionsPanel {
+  background: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+
+  .instructionsHeader {
+    @include type.type-style('heading-04');
+    color: colors.$gray-100;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .instructionsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .instructionStep {
+    .stepTitle {
+      @include type.type-style('label-01');
+      color: colors.$gray-100;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .stepDescription {
+      @include type.type-style('body-01');
+      color: colors.$gray-70;
+      line-height: 1.5;
+    }
+
+    .stepNumber {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      background-color: colors.$blue-60;
+      color: colors.$white;
+      border-radius: 50%;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+  }
+
+  .cphlLink {
+    color: colors.$blue-60;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.progressSection {
+  background: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+
+  .progressHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h2 {
+      @include type.type-style('heading-03');
+      color: colors.$gray-100;
+      margin: 0;
+    }
+  }
+
+  .progressBar {
+    height: 0.5rem;
+    background-color: colors.$gray-20;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+
+    .progressFill {
+      height: 100%;
+      background-color: colors.$blue-60;
+      transition: width 0.3s ease;
+    }
+
+    &.processing .progressFill {
+      animation: progressAnimation 2s ease-in-out infinite;
+    }
+  }
+
+  .progressInfo {
+    display: flex;
+    justify-content: space-between;
+    @include type.type-style('body-compact-01');
+    color: colors.$gray-70;
+  }
+}
+
+@keyframes progressAnimation {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 75%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.statisticsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+
+  .statIcon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &.success {
+      background-color: colors.$green-10;
+      color: colors.$green-60;
+    }
+
+    &.error {
+      background-color: colors.$red-10;
+      color: colors.$red-60;
+    }
+
+    &.warning {
+      background-color: colors.$yellow-10;
+      color: colors.$yellow-60;
+    }
+
+    &.info {
+      background-color: colors.$blue-10;
+      color: colors.$blue-60;
+    }
+  }
+
+  .statValue {
+    @include type.type-style('heading-01');
+    color: colors.$gray-100;
+    margin-bottom: 0.25rem;
+  }
+
+  .statLabel {
+    @include type.type-style('label-01');
+    color: colors.$gray-70;
+  }
+}
+
+.resultsSection {
+  background: colors.$white;
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+
+  .resultsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid colors.$gray-20;
+
+    h2 {
+      @include type.type-style('heading-03');
+      color: colors.$gray-100;
+      margin: 0;
+    }
+  }
+
+  .resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+
+    thead {
+      background-color: colors.$gray-10;
+
+      th {
+        @include type.type-style('label-01');
+        color: colors.$gray-100;
+        text-align: left;
+        padding: 0.75rem;
+        font-weight: 600;
+        border-bottom: 2px solid colors.$gray-30;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid colors.$gray-20;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        td {
+          @include type.type-style('body-01');
+          color: colors.$gray-100;
+          padding: 0.75rem;
+
+          &.statusCell {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+
+  .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    @include type.type-style('label-01');
+    font-weight: 500;
+
+    &.success {
+      background-color: colors.$green-10;
+      color: colors.$green-60;
+    }
+
+    &.error {
+      background-color: colors.$red-10;
+      color: colors.$red-60;
+    }
+
+    &.warning {
+      background-color: colors.$yellow-10;
+      color: colors.$yellow-60;
+    }
+
+    &.info {
+      background-color: colors.$blue-10;
+      color: colors.$blue-60;
+    }
+  }
+
+  .emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+
+    .emptyIcon {
+      color: colors.$gray-40;
+      margin-bottom: 1rem;
+    }
+
+    .emptyTitle {
+      @include type.type-style('heading-03');
+      color: colors.$gray-100;
+      margin-bottom: 0.5rem;
+    }
+
+    .emptyDescription {
+      @include type.type-style('body-01');
+      color: colors.$gray-70;
+    }
+  }
+}
+
+.errorSummary {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+
+  .errorSection {
+    background: colors.$white;
+    border: 1px solid colors.$gray-30;
+    border-left: 4px solid;
+    border-radius: 0.25rem;
+    padding: 1rem;
+
+    &.patients {
+      border-left-color: colors.$red-60;
+    }
+
+    &.encounters {
+      border-left-color: colors.$yellow-60;
+    }
+
+    &.results {
+      border-left-color: colors.$blue-60;
+    }
+
+    .errorTitle {
+      @include type.type-style('label-01');
+      color: colors.$gray-100;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .errorList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      .errorItem {
+        padding: 0.25rem 0.75rem;
+        background-color: colors.$gray-10;
+        border-radius: 1rem;
+        @include type.type-style('body-compact-01');
+        color: colors.$gray-100;
+        font-family: monospace;
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ import { moduleName } from "./constants";
 
 import formBuilderAppMenu from "./menu-app-items/form-builder-app-item/form-builder-app-item.component";
 import systemInfoAppMenu from "./menu-app-items/system-info-app-item/system-info-app-item.component";
+import systemAdminAppMenu from "./menu-app-items/system-admin-item/system-admin-item.component";
 import legacyAdminAppMenu from "./menu-app-items/legacy-admin-item/legacy-admin-item.component";
 import cohortBuilderAppMenu from "./menu-app-items/cohort-builder-item/cohort-builder-item.component";
 import formRenderTestAppMenu from "./menu-app-items/form-render-test-item/form-render-test-item.component";
@@ -42,6 +43,7 @@ const options = {
 
 export const formBuilderAppMenuItem = getSyncLifecycle(formBuilderAppMenu, options);
 export const systemInfoAppMenuItem = getSyncLifecycle(systemInfoAppMenu, options);
+export const systemAdminAppMenuItem = getSyncLifecycle(systemAdminAppMenu, options);
 export const legacyAdminAppMenuItem = getSyncLifecycle(legacyAdminAppMenu, options);
 export const cohortBuilderAppMenuItem = getSyncLifecycle(cohortBuilderAppMenu, options);
 export const formRenderTestAppMenuItem = getSyncLifecycle(formRenderTestAppMenu, options);
@@ -65,6 +67,30 @@ export const systemInfoPage = getAsyncLifecycle(
   () => import("./pages/system-info/system-info.component"),
   {
     featureName: "system info page",
+    moduleName,
+  },
+);
+
+export const systemAdminPage = getAsyncLifecycle(
+  () => import("./pages/system-admin/system-admin.component"),
+  {
+    featureName: "system admin page",
+    moduleName,
+  },
+);
+
+export const profileDetailModal = getAsyncLifecycle(
+  () => import("./pages/system-admin/sync-profiles/profile-detail-modal.component"),
+  {
+    featureName: "profile detail modal",
+    moduleName,
+  },
+);
+
+export const taskTypeDetailModal = getAsyncLifecycle(
+  () => import("./pages/system-admin/sync-task-types/tasktype-detail-modal.component"),
+  {
+    featureName: "task type detail modal",
     moduleName,
   },
 );

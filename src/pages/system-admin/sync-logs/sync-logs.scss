@@ -1,0 +1,135 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/type';
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.syncLogsContent {
+  padding: 0;
+  width: 100%;
+}
+
+.syncTable {
+  margin-top: 1rem;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &.status_success {
+    color: colors.$green-60;
+  }
+
+  &.status_failed {
+    color: colors.$red-60;
+  }
+
+  &.status_in_progress {
+    color: colors.$blue-60;
+  }
+
+  &.status_pending {
+    color: colors.$gray-60;
+  }
+}
+
+.statusSuccess {
+  color: colors.$green-60;
+}
+
+.statusFailed {
+  color: colors.$red-60;
+}
+
+.statusInProgress {
+  color: colors.$blue-60;
+  animation: spin 1s linear infinite;
+}
+
+.statusPending {
+  color: colors.$gray-60;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.filterContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: colors.$gray-10;
+  border-radius: 0.25rem;
+}
+
+.datePicker {
+  display: flex;
+  width: fit-content;
+
+  input {
+    background-color: #ffffff;
+  }
+
+  :global(.cds--date-picker-container) {
+    margin-right: 1rem !important;
+  }
+}
+
+.toolbarContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  color: colors.$gray-40;
+  margin-bottom: 1rem;
+}
+
+.emptyStateTitle {
+  @include type.type-style('heading-03');
+  color: colors.$gray-100;
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateDescription {
+  @include type.type-style('body-01');
+  color: colors.$gray-70;
+  margin-bottom: 1.5rem;
+}
+
+.tileContainer {
+  background-color: $ui-02;
+  border-top: 1px solid $ui-03;
+  padding: layout.$spacing-11 0;
+}
+
+.tile {
+  margin: auto;
+  width: fit-content;
+}
+
+.tileContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
