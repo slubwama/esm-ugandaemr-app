@@ -17,15 +17,14 @@ import {
   Renew,
   Download,
 } from '@carbon/react/icons';
-import { useLayoutType } from '@openmrs/esm-framework';
-import { showNotification, showSnackbar } from '@openmrs/esm-framework';
+import { useLayoutType , showNotification, showSnackbar } from '@openmrs/esm-framework';
 import {
   uploadViralLoadCSV,
   getViralLoadTemplate,
   validateViralLoadCSV,
 } from './viral-load-upload.resources';
 import {
-  ViralLoadUploadResponse,
+  type ViralLoadUploadResponse,
 } from './viral-load-upload.types';
 import styles from './viral-load-upload.scss';
 

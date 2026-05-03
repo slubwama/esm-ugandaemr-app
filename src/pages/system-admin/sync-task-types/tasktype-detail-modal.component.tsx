@@ -12,7 +12,7 @@ import {
 } from '@carbon/react';
 import { showNotification, showSnackbar } from '@openmrs/esm-framework';
 import { updateSyncTaskType, createSyncTaskType } from './sync-task-types.resources';
-import { SyncTaskType, SyncTaskTypeFormData } from './sync-task-types.types';
+import { type SyncTaskType, type SyncTaskTypeFormData } from './sync-task-types.types';
 import styles from './tasktype-detail-modal.scss';
 
 interface TaskTypeDetailModalProps {

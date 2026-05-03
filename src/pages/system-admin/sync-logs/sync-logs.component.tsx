@@ -32,7 +32,7 @@ import {
   PartitionAuto,
 } from '@carbon/react/icons';
 import { useSyncLogs } from './sync-logs.resources';
-import { SyncTaskLog } from './sync-logs.types';
+import { type SyncTaskLog } from './sync-logs.types';
 import styles from './sync-logs.scss';
 
 const SyncLogsContent: React.FC = () => {

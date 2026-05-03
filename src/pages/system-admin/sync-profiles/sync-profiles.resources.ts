@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { SyncFhirProfile, SyncProfileFormData, SyncProfileResponse } from './sync-profiles.types';
+import { type SyncFhirProfile, type SyncProfileFormData, type SyncProfileResponse } from './sync-profiles.types';
 
 export function useSyncProfiles() {
   const apiUrl = '/ws/rest/v1/syncfhirprofile?v=full';

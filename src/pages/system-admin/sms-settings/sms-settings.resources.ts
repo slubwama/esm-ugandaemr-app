@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { SMSSettings, DEFAULT_SMS_SETTINGS } from './sms-settings.types';
+import { type SMSSettings, DEFAULT_SMS_SETTINGS } from './sms-settings.types';
 
 // Global Property Keys from backend
 const GP_KEYS = {

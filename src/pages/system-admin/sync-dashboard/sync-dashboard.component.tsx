@@ -27,9 +27,9 @@ import {
 } from './sync-dashboard.resources';
 import {
   SyncDashboardMetrics,
-  SyncAlert,
-  SyncActivity,
-  ActiveSyncOperation,
+  type SyncAlert,
+  type SyncActivity,
+  type ActiveSyncOperation,
 } from './sync-dashboard.types';
 import { useNavigate } from 'react-router-dom';
 import { showNotification, showSnackbar } from '@openmrs/esm-framework';

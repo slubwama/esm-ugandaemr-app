@@ -39,7 +39,7 @@ import {
   triggerSync,
   exportProfiles,
 } from './sync-profiles.resources';
-import { SyncFhirProfile } from './sync-profiles.types';
+import { type SyncFhirProfile } from './sync-profiles.types';
 import ProfileDetailModal from './profile-detail-modal.component';
 import styles from './sync-profiles.scss';
 

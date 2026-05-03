@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { SyncTaskLog } from './sync-logs.types';
+import { type SyncTaskLog } from './sync-logs.types';
 
 export function useSyncLogs() {
   const apiUrl = '/ws/rest/v1/synctask?v=full';

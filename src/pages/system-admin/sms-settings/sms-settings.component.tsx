@@ -30,7 +30,7 @@ import {
   updateSMSSettings,
   testSMSConnection,
 } from './sms-settings.resources';
-import { SMSSettings } from './sms-settings.types';
+import { type SMSSettings } from './sms-settings.types';
 import styles from './sms-settings.scss';
 
 const SMSSettingsContent: React.FC = () => {

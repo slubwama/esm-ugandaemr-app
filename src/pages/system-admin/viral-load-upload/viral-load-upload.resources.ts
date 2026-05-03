@@ -1,10 +1,10 @@
 import { openmrsFetch } from '@openmrs/esm-framework';
 import {
-  ViralLoadUploadResponse,
-  ViralLoadTemplate,
-  ViralLoadValidationResponse,
-  ViralLoadResult,
-  UploadStatistics,
+  type ViralLoadUploadResponse,
+  type ViralLoadTemplate,
+  type ViralLoadValidationResponse,
+  type ViralLoadResult,
+  type UploadStatistics,
 } from './viral-load-upload.types';
 
 const API_BASE_URL = '/ws/rest/v1/ugandaemrsync/viralload';

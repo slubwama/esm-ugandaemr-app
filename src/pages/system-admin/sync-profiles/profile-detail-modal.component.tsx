@@ -15,7 +15,7 @@ import {
 } from '@carbon/react';
 import { showNotification, showSnackbar } from '@openmrs/esm-framework';
 import { updateSyncProfile, createSyncProfile, testSyncConnection } from './sync-profiles.resources';
-import { SyncFhirProfile, SyncProfileFormData } from './sync-profiles.types';
+import { type SyncFhirProfile, type SyncProfileFormData } from './sync-profiles.types';
 import styles from './profile-detail-modal.scss';
 
 interface ProfileDetailModalProps {

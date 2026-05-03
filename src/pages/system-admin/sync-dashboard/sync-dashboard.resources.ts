@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { SyncDashboardMetrics, SyncAlert, SyncActivity, ActiveSyncOperation, DashboardData } from './sync-dashboard.types';
+import { type SyncDashboardMetrics, type SyncAlert, type SyncActivity, type ActiveSyncOperation, type DashboardData } from './sync-dashboard.types';
 
 export function useDashboardMetrics() {
   const apiUrl = '/ws/rest/v1/ugandaemrsync/dashboard/metrics';

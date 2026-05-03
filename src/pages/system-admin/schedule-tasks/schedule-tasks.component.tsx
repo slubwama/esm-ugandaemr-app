@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataTable,
@@ -90,7 +90,7 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
     );
   }, [scheduledTasks, searchQuery]);
 
-  const handleToggleTaskStatus = (taskId: string) => {
+  const handleToggleTaskStatus = useCallback((taskId: string) => {
     setScheduledTasks((prev) =>
       prev.map((task) =>
         task.id === taskId
@@ -104,9 +104,9 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
       title: t('taskStatusUpdated', 'Task status updated'),
       autoClose: true,
     });
-  };
+  }, [t]);
 
-  const handleRunNow = (taskId: string) => {
+  const handleRunNow = useCallback((taskId: string) => {
     showSnackbar({
       isLowContrast: true,
       kind: 'success',
@@ -114,9 +114,9 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
       subtitle: t('taskTriggeredDesc', 'Task will run immediately'),
       autoClose: true,
     });
-  };
+  }, [t]);
 
-  const handleDeleteTask = (taskId: string) => {
+  const handleDeleteTask = useCallback((taskId: string) => {
     setScheduledTasks((prev) => prev.filter((task) => task.id !== taskId));
     showSnackbar({
       isLowContrast: true,
@@ -124,9 +124,9 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
       title: t('taskDeleted', 'Task deleted'),
       autoClose: true,
     });
-  };
+  }, [t]);
 
-  const getStatusTag = (status: string) => {
+  const getStatusTag = useCallback((status: string) => {
     switch (status) {
       case 'active':
         return <Tag type="green">{t('active', 'Active')}</Tag>;
@@ -139,9 +139,9 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
       default:
         return <Tag>{status}</Tag>;
     }
-  };
+  }, [t]);
 
-  const getLastStatusIcon = (status: string) => {
+  const getLastStatusIcon = useCallback((status: string) => {
     switch (status) {
       case 'success':
         return <Checkmark size={16} className={styles.statusSuccess} />;
@@ -150,7 +150,7 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
       default:
         return <Time size={16} className={styles.statusPending} />;
     }
-  };
+  }, []);
 
   const tableHeaders = useMemo(
     () => [
@@ -198,7 +198,7 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
           </div>
         ),
       })),
-    [filteredTasks, t]
+    [filteredTasks, t, getLastStatusIcon, getStatusTag, handleRunNow, handleToggleTaskStatus, handleDeleteTask]
   );
 
   return (

@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { SyncTaskType, SyncTaskTypeFormData, SyncTaskTypeResponse } from './sync-task-types.types';
+import { type SyncTaskType, type SyncTaskTypeFormData, type SyncTaskTypeResponse } from './sync-task-types.types';
 
 export function useSyncTaskTypes() {
   const apiUrl = '/ws/rest/v1/synctasktype?v=full';

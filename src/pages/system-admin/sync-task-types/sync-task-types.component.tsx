@@ -39,7 +39,7 @@ import {
   executeTaskType,
   exportTaskTypes,
 } from './sync-task-types.resources';
-import { SyncTaskType } from './sync-task-types.types';
+import { type SyncTaskType } from './sync-task-types.types';
 import TaskTypeDetailModal from './tasktype-detail-modal.component';
 import styles from './sync-task-types.scss';
 
