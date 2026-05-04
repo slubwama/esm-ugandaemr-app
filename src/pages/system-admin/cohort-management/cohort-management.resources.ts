@@ -3,7 +3,7 @@ import {
   CohortType,
   Cohort,
   CohortWithMembers,
-  CohortFormData,
+  type CohortFormData,
 } from './cohort-management.types';
 
 export function useCohortTypes() {
@@ -113,8 +113,8 @@ export async function getCohortForEdit(uuid: string) {
 export async function removePatientFromCohort(memberUuid: string) {
   const today = new Date();
   const yyyy = today.getFullYear();
-  let mm = today.getMonth() + 1;
-  let dd = today.getDate();
+  const mm = today.getMonth() + 1;
+  const dd = today.getDate();
 
   const ddStr = dd < 10 ? '0' + dd : dd.toString();
   const mmStr = mm < 10 ? '0' + mm : mm.toString();

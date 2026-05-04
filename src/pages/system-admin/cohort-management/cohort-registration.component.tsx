@@ -29,6 +29,14 @@ import {
 import { type Cohort, type CohortFormData, type CohortType } from './cohort-management.types';
 import styles from './cohort-management.scss';
 
+// Specific cohort type UUIDs from the GSP
+const COHORT_TYPE_UUIDS = [
+  'e50fa0af-df36-4a26-853f-feb05244e5ca',
+  'aa536e57-a3c3-453c-9413-cf70b5d2ad5d',
+  'da964ff0-648e-440b-a219-d2aeba3670d0',
+  '5b7136fa-d207-4229-94a8-da6661ae00bf',
+];
+
 const CohortRegistration: React.FC = () => {
   const { t } = useTranslation();
   const { fetchCohortTypes } = useCohortTypes();
@@ -62,14 +70,6 @@ const CohortRegistration: React.FC = () => {
     cohortType: '',
   });
 
-  // Specific cohort type UUIDs from the GSP
-  const cohortTypeUuids = [
-    'e50fa0af-df36-4a26-853f-feb05244e5ca',
-    'aa536e57-a3c3-453c-9413-cf70b5d2ad5d',
-    'da964ff0-648e-440b-a219-d2aeba3670d0',
-    '5b7136fa-d207-4229-94a8-da6661ae00bf',
-  ];
-
   useEffect(() => {
     const loadInitialData = async () => {
       setIsLoading(true);
@@ -78,7 +78,7 @@ const CohortRegistration: React.FC = () => {
         setCohortTypes(types);
 
         const allCohorts: Array<Cohort> = [];
-        for (const uuid of cohortTypeUuids) {
+        for (const uuid of COHORT_TYPE_UUIDS) {
           const typeCohorts = await fetchCohortsByType(uuid);
           allCohorts.push(...typeCohorts);
         }
@@ -96,7 +96,7 @@ const CohortRegistration: React.FC = () => {
     };
 
     loadInitialData();
-  }, []);
+  }, [fetchCohortTypes, t]);
 
   const filteredCohorts = useMemo(() => {
     if (!searchQuery) return cohorts;
@@ -171,7 +171,7 @@ const CohortRegistration: React.FC = () => {
         });
 
         const allCohorts: Array<Cohort> = [];
-        for (const uuid of cohortTypeUuids) {
+        for (const uuid of COHORT_TYPE_UUIDS) {
           const typeCohorts = await fetchCohortsByType(uuid);
           allCohorts.push(...typeCohorts);
         }
@@ -256,7 +256,7 @@ const CohortRegistration: React.FC = () => {
       setIsModalOpen(false);
 
       const allCohorts: Array<Cohort> = [];
-      for (const uuid of cohortTypeUuids) {
+      for (const uuid of COHORT_TYPE_UUIDS) {
         const typeCohorts = await fetchCohortsByType(uuid);
         allCohorts.push(...typeCohorts);
       }

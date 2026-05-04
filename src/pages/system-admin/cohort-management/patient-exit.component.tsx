@@ -65,7 +65,7 @@ const PatientExit: React.FC = () => {
     };
 
     loadCohortTypes();
-  }, []);
+  }, [fetchCohortTypes, t]);
 
   useEffect(() => {
     const loadPatients = async () => {
@@ -119,7 +119,7 @@ const PatientExit: React.FC = () => {
     };
 
     loadPatients();
-  }, [selectedCohortType]);
+  }, [selectedCohortType, t]);
 
   const handleRemovePatient = useCallback(
     async (memberUuid: string) => {

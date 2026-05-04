@@ -1,10 +1,10 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import {
-  SyncFhirProfile,
-  SyncFhirCase,
-  SyncFhirResource,
-  SyncFhirProfileLog,
+  type SyncFhirProfile,
+  type SyncFhirCase,
+  type SyncFhirResource,
+  type SyncFhirProfileLog,
 } from './sync-profile-statistics.types';
 
 export function useSyncFhirProfiles() {
