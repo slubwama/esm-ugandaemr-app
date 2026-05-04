@@ -98,7 +98,7 @@ const PatientExit: React.FC = () => {
     } finally {
       setIsLoadingPatients(false);
     }
-  }, []);
+  }, [t]);
 
   // Load patients when selected cohort type changes
   React.useEffect(() => {

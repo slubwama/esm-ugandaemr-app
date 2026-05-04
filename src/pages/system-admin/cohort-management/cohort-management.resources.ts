@@ -1,9 +1,9 @@
 import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import {
-  CohortType,
-  Cohort,
-  CohortWithMembers,
+  type CohortType,
+  type Cohort,
+  type CohortWithMembers,
   type CohortFormData,
 } from './cohort-management.types';
 
