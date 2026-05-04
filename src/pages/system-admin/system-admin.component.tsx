@@ -16,7 +16,7 @@ import SyncDashboardContent from './sync-dashboard/sync-dashboard.component';
 import SyncProfilesContent from './sync-profiles';
 import SyncTaskTypesContent from './sync-task-types';
 import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
-import SMSSettingsContent from './sms-settings/sms-settings.component';
+import SMSSettingsContent from './sms-settings';
 import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
 import CohortManagementContent from './cohort-management';
 
@@ -73,8 +73,8 @@ const SystemAdminPage: React.FC = () => {
     },
     {
       id: 'sms-settings' as AdminSection,
-      label: t('smsSettings', 'SMS Settings'),
-      description: t('smsSettingsDesc', 'Configure SMS gateway and appointment reminder settings'),
+      label: t('sms', 'SMS'),
+      description: t('smsDesc', 'Configure SMS gateway and view sent message logs'),
       icon: Mobile,
     },
   ];
