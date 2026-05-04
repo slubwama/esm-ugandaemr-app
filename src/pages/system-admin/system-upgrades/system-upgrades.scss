@@ -1,0 +1,211 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/type';
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.systemUpgradesContent {
+  padding: 2rem;
+  width: 100%;
+}
+
+.upgradeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .headerLeft {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    flex: 1;
+
+    .headerIcon {
+      color: colors.$blue-60;
+      flex-shrink: 0;
+    }
+  }
+
+  .pageTitle {
+    @include type.type-style('heading-03');
+    color: colors.$gray-100;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .pageDescription {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin: 0;
+  }
+}
+
+.upgradeTasksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.taskTile {
+  border: 1px solid colors.$gray-30;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: colors.$gray-40;
+  }
+
+  .taskHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .taskIcon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .taskInfo {
+      flex: 1;
+
+      .taskName {
+        @include type.type-style('heading-04');
+        color: colors.$gray-100;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .taskDescription {
+        @include type.type-style('body-01');
+        color: colors.$gray-70;
+        margin: 0;
+      }
+    }
+
+    .priorityTag {
+      flex-shrink: 0;
+    }
+  }
+
+  .taskActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .executionStatus {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid colors.$gray-20;
+  }
+
+  .taskMetadata {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid colors.$gray-20;
+
+    .taskClass {
+      @include type.type-style('code-02');
+      color: colors.$gray-60;
+      font-size: 0.75rem;
+      font-family: monospace;
+      word-break: break-all;
+    }
+  }
+}
+
+.upgradeInfo {
+  margin-top: 2rem;
+
+  .infoTile {
+    background-color: colors.$blue-10;
+    border-left: 4px solid colors.$blue-60;
+
+    h4 {
+      @include type.type-style('heading-04');
+      color: colors.$gray-100;
+      margin: 0 0 1rem 0;
+    }
+
+    .infoList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        @include type.type-style('body-01');
+        color: colors.$gray-100;
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+        position: relative;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: colors.$blue-60;
+          font-weight: bold;
+        }
+
+        strong {
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  .emptyStateIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: colors.$gray-60;
+  }
+
+  h3 {
+    @include type.type-style('heading-04');
+    color: colors.$gray-100;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.errorState {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  .errorIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: colors.$red-60;
+  }
+
+  h3 {
+    @include type.type-style('heading-04');
+    color: colors.$gray-100;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @include type.type-style('body-01');
+    color: colors.$gray-70;
+    margin-bottom: 1.5rem;
+  }
+}

@@ -10,6 +10,7 @@ import {
   Dashboard,
   Upload,
   Group,
+  Renew,
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
 import SyncDashboardContent from './sync-dashboard/sync-dashboard.component';
@@ -19,6 +20,7 @@ import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
 import SMSSettingsContent from './sms-settings';
 import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
 import CohortManagementContent from './cohort-management';
+import SystemUpgradesContent from './system-upgrades';
 
 type AdminSection =
   | 'overview'
@@ -28,7 +30,8 @@ type AdminSection =
   | 'schedule-tasks'
   | 'cohort-management'
   | 'viral-load-upload'
-  | 'sms-settings';
+  | 'sms-settings'
+  | 'system-upgrades';
 
 const SystemAdminPage: React.FC = () => {
   const { t } = useTranslation();
@@ -77,6 +80,12 @@ const SystemAdminPage: React.FC = () => {
       description: t('smsDesc', 'Configure SMS gateway and view sent message logs'),
       icon: Mobile,
     },
+    {
+      id: 'system-upgrades' as AdminSection,
+      label: t('systemUpgrades', 'System Updates & Upgrades'),
+      description: t('systemUpgradesDesc', 'Execute system upgrades and update EMR components'),
+      icon: Renew,
+    },
   ];
 
   const renderContent = () => {
@@ -95,6 +104,8 @@ const SystemAdminPage: React.FC = () => {
         return <ViralLoadUploadContent />;
       case 'sms-settings':
         return <SMSSettingsContent />;
+      case 'system-upgrades':
+        return <SystemUpgradesContent />;
       default:
         return (
           <div className={styles.overviewContent}>
