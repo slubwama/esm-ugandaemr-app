@@ -19,6 +19,7 @@ import {
   TableContainer,
   Tag,
   Tile,
+  Pagination,
 } from '@carbon/react';
 import {
   ErrorState,
@@ -200,32 +201,43 @@ const SyncProfileStatistics: React.FC = () => {
                   <p>{t('noCasesFound', 'No patient cases found for this profile')}</p>
                 </Tile>
               ) : (
-                <DataTable rows={casesTableRows} headers={casesTableHeaders}>
-                  {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-                    <TableContainer>
-                      <Table {...getTableProps()}>
-                        <TableHead>
-                          <TableRow>
-                            {headers.map((header) => (
-                              <TableHeader key={header.key} {...getHeaderProps({ header })}>
-                                {header.header}
-                              </TableHeader>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {rows.map((row) => (
-                            <TableRow key={row.id} {...getRowProps({ row })}>
-                              {row.cells.map((cell) => (
-                                <TableCell key={cell.id}>{cell.value}</TableCell>
+                <>
+                  <DataTable rows={casesTableRows} headers={casesTableHeaders}>
+                    {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
+                      <TableContainer>
+                        <Table {...getTableProps()}>
+                          <TableHead>
+                            <TableRow>
+                              {headers.map((header) => (
+                                <TableHeader key={header.key} {...getHeaderProps({ header })}>
+                                  {header.header}
+                                </TableHeader>
                               ))}
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </DataTable>
+                          </TableHead>
+                          <TableBody>
+                            {rows.map((row) => (
+                              <TableRow key={row.id} {...getRowProps({ row })}>
+                                {row.cells.map((cell) => (
+                                  <TableCell key={cell.id}>{cell.value}</TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </DataTable>
+
+                  <Pagination
+                    totalItems={cases.length}
+                    pageSize={pageSize}
+                    pageSizes={[pageSize]}
+                    page={currentPageCases}
+                    onChange={({ page }) => goToCases(page)}
+                    className={styles.pagination}
+                  />
+                </>
               )}
             </TabPanel>
             <TabPanel>
@@ -241,32 +253,43 @@ const SyncProfileStatistics: React.FC = () => {
                   <p>{t('noResourcesFound', 'No resources found for this profile')}</p>
                 </Tile>
               ) : (
-                <DataTable rows={resourcesTableRows} headers={resourcesTableHeaders}>
-                  {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-                    <TableContainer>
-                      <Table {...getTableProps()}>
-                        <TableHead>
-                          <TableRow>
-                            {headers.map((header) => (
-                              <TableHeader key={header.key} {...getHeaderProps({ header })}>
-                                {header.header}
-                              </TableHeader>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {rows.map((row) => (
-                            <TableRow key={row.id} {...getRowProps({ row })}>
-                              {row.cells.map((cell) => (
-                                <TableCell key={cell.id}>{cell.value}</TableCell>
+                <>
+                  <DataTable rows={resourcesTableRows} headers={resourcesTableHeaders}>
+                    {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
+                      <TableContainer>
+                        <Table {...getTableProps()}>
+                          <TableHead>
+                            <TableRow>
+                              {headers.map((header) => (
+                                <TableHeader key={header.key} {...getHeaderProps({ header })}>
+                                  {header.header}
+                                </TableHeader>
                               ))}
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </DataTable>
+                          </TableHead>
+                          <TableBody>
+                            {rows.map((row) => (
+                              <TableRow key={row.id} {...getRowProps({ row })}>
+                                {row.cells.map((cell) => (
+                                  <TableCell key={cell.id}>{cell.value}</TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </DataTable>
+
+                  <Pagination
+                    totalItems={resources.length}
+                    pageSize={pageSize}
+                    pageSizes={[pageSize]}
+                    page={currentPageResources}
+                    onChange={({ page }) => goToResources(page)}
+                    className={styles.pagination}
+                  />
+                </>
               )}
             </TabPanel>
             <TabPanel>
@@ -282,32 +305,43 @@ const SyncProfileStatistics: React.FC = () => {
                   <p>{t('noLogsFound', 'No profile logs found for this profile')}</p>
                 </Tile>
               ) : (
-                <DataTable rows={logsTableRows} headers={logsTableHeaders}>
-                  {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-                    <TableContainer>
-                      <Table {...getTableProps()}>
-                        <TableHead>
-                          <TableRow>
-                            {headers.map((header) => (
-                              <TableHeader key={header.key} {...getHeaderProps({ header })}>
-                                {header.header}
-                              </TableHeader>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {rows.map((row) => (
-                            <TableRow key={row.id} {...getRowProps({ row })}>
-                              {row.cells.map((cell) => (
-                                <TableCell key={cell.id}>{cell.value}</TableCell>
+                <>
+                  <DataTable rows={logsTableRows} headers={logsTableHeaders}>
+                    {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
+                      <TableContainer>
+                        <Table {...getTableProps()}>
+                          <TableHead>
+                            <TableRow>
+                              {headers.map((header) => (
+                                <TableHeader key={header.key} {...getHeaderProps({ header })}>
+                                  {header.header}
+                                </TableHeader>
                               ))}
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  )}
-                </DataTable>
+                          </TableHead>
+                          <TableBody>
+                            {rows.map((row) => (
+                              <TableRow key={row.id} {...getRowProps({ row })}>
+                                {row.cells.map((cell) => (
+                                  <TableCell key={cell.id}>{cell.value}</TableCell>
+                                ))}
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </DataTable>
+
+                  <Pagination
+                    totalItems={logs.length}
+                    pageSize={pageSize}
+                    pageSizes={[pageSize]}
+                    page={currentPageLogs}
+                    onChange={({ page }) => goToLogs(page)}
+                    className={styles.pagination}
+                  />
+                </>
               )}
             </TabPanel>
           </TabPanels>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataTable,
@@ -17,7 +17,7 @@ import {
   FormGroup,
   InlineLoading,
 } from '@carbon/react';
-import { Add, Edit, TrashCan, Search } from '@carbon/react/icons';
+import { Add, Edit, TrashCan, Search, Renew } from '@carbon/react/icons';
 import { showNotification, showSnackbar, openmrsFetch } from '@openmrs/esm-framework';
 import {
   useCohortTypes,
@@ -39,22 +39,57 @@ const COHORT_TYPE_UUIDS = [
 
 const CohortRegistration: React.FC = () => {
   const { t } = useTranslation();
-  const { fetchCohortTypes } = useCohortTypes();
+  const { cohortTypes, isLoading: typesLoading, isError: typesError } = useCohortTypes();
 
-  const [cohortTypes, setCohortTypes] = useState<Array<CohortType>>([]);
+  // Fetch cohorts for all types manually on mount and refresh
+  const fetchAllCohorts = useCallback(async () => {
+    const allCohorts: Array<Cohort> = [];
+    for (const uuid of COHORT_TYPE_UUIDS) {
+      const response = await openmrsFetch(
+        `/ws/rest/v1/cohortm/cohort?v=custom:(name,uuid,description,voided,cohortType,startDate)&cohortType=${uuid}`
+      );
+      allCohorts.push(...response.data.results);
+    }
+    return allCohorts;
+  }, []);
+
   const [cohorts, setCohorts] = useState<Array<Cohort>>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCohorts, setIsLoadingCohorts] = useState(false);
+  const [cohortsError, setCohortsError] = useState<Error | null>(null);
+
+  const loadCohorts = useCallback(async () => {
+    setIsLoadingCohorts(true);
+    setCohortsError(null);
+    try {
+      const data = await fetchAllCohorts();
+      setCohorts(data);
+    } catch (error) {
+      setCohortsError(error);
+    } finally {
+      setIsLoadingCohorts(false);
+    }
+  }, [fetchAllCohorts]);
+
+  // Load cohorts on mount
+  React.useEffect(() => {
+    loadCohorts();
+  }, [loadCohorts]);
+
+  const handleRefresh = useCallback(async () => {
+    await loadCohorts();
+    showSnackbar({
+      isLowContrast: true,
+      kind: 'success',
+      title: t('refreshSuccess', 'Refresh Successful'),
+      subtitle: t('cohortsRefreshed', 'Cohorts have been refreshed'),
+      autoClose: true,
+    });
+  }, [loadCohorts, t]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCohort, setEditingCohort] = useState<Cohort | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const fetchCohortsByType = async (cohortTypeUuid: string) => {
-    const response = await openmrsFetch(
-      `/ws/rest/v1/cohortm/cohort?v=custom:(name,uuid,description,voided,cohortType,startDate)&cohortType=${cohortTypeUuid}`
-    );
-    return response.data.results;
-  };
 
   const [formData, setFormData] = useState<CohortFormData>({
     name: '',
@@ -69,34 +104,6 @@ const CohortRegistration: React.FC = () => {
     uuid: '',
     cohortType: '',
   });
-
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const types = await fetchCohortTypes();
-        setCohortTypes(types);
-
-        const allCohorts: Array<Cohort> = [];
-        for (const uuid of COHORT_TYPE_UUIDS) {
-          const typeCohorts = await fetchCohortsByType(uuid);
-          allCohorts.push(...typeCohorts);
-        }
-        setCohorts(allCohorts);
-      } catch (error) {
-        showNotification({
-          title: t('errorLoadingData', 'Error loading data'),
-          kind: 'error',
-          critical: true,
-          description: error.message,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, [fetchCohortTypes, t]);
 
   const filteredCohorts = useMemo(() => {
     if (!searchQuery) return cohorts;
@@ -128,7 +135,6 @@ const CohortRegistration: React.FC = () => {
 
   const handleEditCohort = useCallback(
     async (cohort: Cohort) => {
-      setIsLoading(true);
       try {
         const data = await getCohortForEdit(cohort.uuid);
         setEditingCohort(cohort);
@@ -146,8 +152,6 @@ const CohortRegistration: React.FC = () => {
           critical: true,
           description: error.message,
         });
-      } finally {
-        setIsLoading(false);
       }
     },
     [t]
@@ -159,7 +163,6 @@ const CohortRegistration: React.FC = () => {
         return;
       }
 
-      setIsLoading(true);
       try {
         await deleteCohort(cohort.uuid);
         showSnackbar({
@@ -170,12 +173,7 @@ const CohortRegistration: React.FC = () => {
           autoClose: true,
         });
 
-        const allCohorts: Array<Cohort> = [];
-        for (const uuid of COHORT_TYPE_UUIDS) {
-          const typeCohorts = await fetchCohortsByType(uuid);
-          allCohorts.push(...typeCohorts);
-        }
-        setCohorts(allCohorts);
+        await loadCohorts();
       } catch (error) {
         showNotification({
           title: t('errorDeletingCohort', 'Error deleting cohort'),
@@ -183,11 +181,9 @@ const CohortRegistration: React.FC = () => {
           critical: true,
           description: error.message,
         });
-      } finally {
-        setIsLoading(false);
       }
     },
-    [t]
+    [t, loadCohorts]
   );
 
   const validateForm = useCallback(() => {
@@ -226,54 +222,51 @@ const CohortRegistration: React.FC = () => {
     return isValid;
   }, [formData, t]);
 
-  const handleSubmit = useCallback(async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      if (editingCohort) {
-        await updateCohort(editingCohort.uuid, formData);
-        showSnackbar({
-          isLowContrast: true,
-          kind: 'success',
-          title: t('cohortUpdated', 'Cohort updated'),
-          subtitle: t('cohortUpdatedSuccess', 'Cohort has been updated successfully'),
-          autoClose: true,
-        });
-      } else {
-        await createCohort(formData);
-        showSnackbar({
-          isLowContrast: true,
-          kind: 'success',
-          title: t('cohortCreated', 'Cohort created'),
-          subtitle: t('cohortCreatedSuccess', 'Cohort has been created successfully'),
-          autoClose: true,
-        });
+  const handleSubmit = useCallback(
+    async () => {
+      if (!validateForm()) {
+        return;
       }
 
-      setIsModalOpen(false);
+      setIsSubmitting(true);
+      try {
+        if (editingCohort) {
+          await updateCohort(editingCohort.uuid, formData);
+          showSnackbar({
+            isLowContrast: true,
+            kind: 'success',
+            title: t('cohortUpdated', 'Cohort updated'),
+            subtitle: t('cohortUpdatedSuccess', 'Cohort has been updated successfully'),
+            autoClose: true,
+          });
+        } else {
+          await createCohort(formData);
+          showSnackbar({
+            isLowContrast: true,
+            kind: 'success',
+            title: t('cohortCreated', 'Cohort created'),
+            subtitle: t('cohortCreatedSuccess', 'Cohort has been created successfully'),
+            autoClose: true,
+          });
+        }
 
-      const allCohorts: Array<Cohort> = [];
-      for (const uuid of COHORT_TYPE_UUIDS) {
-        const typeCohorts = await fetchCohortsByType(uuid);
-        allCohorts.push(...typeCohorts);
+        setIsModalOpen(false);
+        await loadCohorts();
+      } catch (error) {
+        showNotification({
+          title: editingCohort
+            ? t('errorUpdatingCohort', 'Error updating cohort')
+            : t('errorCreatingCohort', 'Error creating cohort'),
+          kind: 'error',
+          critical: true,
+          description: error.message,
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-      setCohorts(allCohorts);
-    } catch (error) {
-      showNotification({
-        title: editingCohort
-          ? t('errorUpdatingCohort', 'Error updating cohort')
-          : t('errorCreatingCohort', 'Error creating cohort'),
-        kind: 'error',
-        critical: true,
-        description: error.message,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData, editingCohort, validateForm, t]);
+    },
+    [formData, editingCohort, validateForm, loadCohorts, t]
+  );
 
   const tableHeaders = useMemo(
     () => [
@@ -323,8 +316,22 @@ const CohortRegistration: React.FC = () => {
     [filteredCohorts, t, handleEditCohort, handleDeleteCohort]
   );
 
-  if (isLoading && cohorts.length === 0) {
-    return <InlineLoading />;
+  if (typesLoading || isLoadingCohorts) {
+    return <InlineLoading description={t('loading', 'Loading...')} />;
+  }
+
+  if (typesError || cohortsError) {
+    return (
+      <div className={styles.cohortRegistrationContent}>
+        <div className={styles.errorState}>
+          <h3>{t('errorLoadingData', 'Error Loading Data')}</h3>
+          <p>{typesError?.message || cohortsError?.message}</p>
+          <Button kind="tertiary" renderIcon={Renew} onClick={handleRefresh}>
+            {t('retry', 'Retry')}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -340,6 +347,9 @@ const CohortRegistration: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
           />
+          <Button kind="tertiary" renderIcon={Renew} onClick={handleRefresh} disabled={isLoadingCohorts}>
+            {t('refresh', 'Refresh')}
+          </Button>
           <Button kind="primary" renderIcon={Add} onClick={handleOpenModal}>
             {t('create', 'Create')}
           </Button>
@@ -380,22 +390,20 @@ const CohortRegistration: React.FC = () => {
         secondaryButtonText={t('cancel', 'Cancel')}
         onRequestClose={() => setIsModalOpen(false)}
         onRequestSubmit={handleSubmit}
-        primaryButtonDisabled={isSubmitting}
-      >
-        <div className={styles.modalContent}>
-          <FormGroup legendText="">
+        primaryButtonDisabled={isSubmitting}>
+        <FormGroup legendText="">
+          <div className={styles.formGroup}>
             <TextInput
               id="cohort-name"
               labelText={t('name', 'Name')}
-              placeholder={t('cohortNamePlaceholder', 'CDDP Group Name')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               invalid={!!formErrors.name}
               invalidText={formErrors.name}
             />
-          </FormGroup>
+          </div>
 
-          <FormGroup legendText="">
+          <div className={styles.formGroup}>
             <TextInput
               id="cohort-description"
               labelText={t('description', 'Description')}
@@ -404,28 +412,28 @@ const CohortRegistration: React.FC = () => {
               invalid={!!formErrors.description}
               invalidText={formErrors.description}
             />
-          </FormGroup>
+          </div>
 
-          <FormGroup legendText="">
+          <div className={styles.formGroup}>
             <TextInput
               id="cohort-uuid"
-              labelText={t('identifierCode', 'Identifier Code')}
+              labelText={t('identifier', 'Identifier')}
               value={formData.uuid}
               onChange={(e) => setFormData({ ...formData, uuid: e.target.value })}
               invalid={!!formErrors.uuid}
               invalidText={formErrors.uuid}
+              disabled={!!editingCohort}
             />
-          </FormGroup>
+          </div>
 
-          <FormGroup legendText="">
+          <div className={styles.formGroup}>
+            <label htmlFor="cohort-type">{t('groupType', 'Group Type')} *</label>
             <Select
               id="cohort-type"
-              labelText={t('groupType', 'Group Type')}
               value={formData.cohortType}
               onChange={(e) => setFormData({ ...formData, cohortType: e.target.value })}
               invalid={!!formErrors.cohortType}
-              invalidText={formErrors.cohortType}
-            >
+              invalidText={formErrors.cohortType}>
               <SelectItem value="" text={t('select', 'Select ---')} />
               {cohortTypes.map((type) => (
                 <SelectItem key={type.uuid} value={type.uuid} text={type.name}>
@@ -433,8 +441,8 @@ const CohortRegistration: React.FC = () => {
                 </SelectItem>
               ))}
             </Select>
-          </FormGroup>
-        </div>
+          </div>
+        </FormGroup>
       </Modal>
     </div>
   );

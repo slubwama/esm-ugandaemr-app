@@ -38,10 +38,10 @@ const CohortManagement: React.FC<CohortManagementProps> = () => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <CohortRegistration />
+            {selectedIndex === 0 && <CohortRegistration />}
           </TabPanel>
           <TabPanel>
-            <PatientExit />
+            {selectedIndex === 1 && <PatientExit />}
           </TabPanel>
         </TabPanels>
       </Tabs>

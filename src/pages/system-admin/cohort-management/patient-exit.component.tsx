@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataTable,
@@ -15,10 +15,11 @@ import {
   InlineLoading,
   Tag,
 } from '@carbon/react';
-import { TrashCan } from '@carbon/react/icons';
+import { TrashCan, Renew } from '@carbon/react/icons';
 import { showNotification, showSnackbar, openmrsFetch } from '@openmrs/esm-framework';
 import {
   useCohortTypes,
+  useCohortsWithMembers,
   removePatientFromCohort,
   getPatientData,
 } from './cohort-management.resources';
@@ -34,92 +35,92 @@ interface PatientMember {
 
 const PatientExit: React.FC = () => {
   const { t } = useTranslation();
-  const { fetchCohortTypes } = useCohortTypes();
+  const { cohortTypes, isLoading: typesLoading, isError: typesError } = useCohortTypes();
+  const {
+    cohortsWithMembers,
+    isLoading: membersLoading,
+    isError: membersError,
+  } = useCohortsWithMembers('');
 
-  const [cohortTypes, setCohortTypes] = useState<Array<CohortType>>([]);
   const [selectedCohortType, setSelectedCohortType] = useState('');
   const [patients, setPatients] = useState<Array<PatientMember>>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
 
-  const fetchCohortsWithMembers = async (cohortTypeUuid: string) => {
-    const response = await openmrsFetch(
-      `/ws/rest/v1/cohortm/cohort?v=custom:(name,cohortMembers,voided)&cohortType=${cohortTypeUuid}`
-    );
-    return response.data.results;
-  };
+  // Load patients when cohort type changes
+  const loadPatientsForCohortType = useCallback(async (cohortTypeUuid: string) => {
+    if (!cohortTypeUuid) {
+      setPatients([]);
+      return;
+    }
 
-  useEffect(() => {
-    const loadCohortTypes = async () => {
-      try {
-        const types = await fetchCohortTypes();
-        setCohortTypes(types);
-      } catch (error) {
-        showNotification({
-          title: t('errorLoadingCohortTypes', 'Error loading cohort types'),
-          kind: 'error',
-          critical: true,
-          description: error.message,
-        });
-      }
-    };
+    setIsLoadingPatients(true);
+    try {
+      const response = await openmrsFetch(
+        `/ws/rest/v1/cohortm/cohort?v=custom:(name,cohortMembers,voided)&cohortType=${cohortTypeUuid}`
+      );
+      const cohorts = response.data.results;
 
-    loadCohortTypes();
-  }, [fetchCohortTypes, t]);
+      const allPatients: Array<PatientMember> = [];
 
-  useEffect(() => {
-    const loadPatients = async () => {
-      if (!selectedCohortType) {
-        setPatients([]);
-        return;
-      }
+      for (const cohort of cohorts) {
+        if (!cohort.voided && cohort.cohortMembers && cohort.cohortMembers.length > 0) {
+          for (const member of cohort.cohortMembers) {
+            if (!member.voided) {
+              try {
+                const patientUri = member.patient.links[0]?.uri;
+                if (patientUri) {
+                  const person = await getPatientData(patientUri);
+                  const startDate = new Date(member.startDate).toLocaleDateString();
 
-      setIsLoadingPatients(true);
-      try {
-        const cohorts = await fetchCohortsWithMembers(selectedCohortType);
-
-        const allPatients: Array<PatientMember> = [];
-
-        for (const cohort of cohorts) {
-          if (!cohort.voided && cohort.cohortMembers && cohort.cohortMembers.length > 0) {
-            for (const member of cohort.cohortMembers) {
-              if (!member.voided) {
-                try {
-                  const patientUri = member.patient.links[0]?.uri;
-                  if (patientUri) {
-                    const person = await getPatientData(patientUri);
-                    const startDate = new Date(member.startDate).toLocaleDateString();
-
-                    allPatients.push({
-                      uuid: member.uuid,
-                      patient: person,
-                      cohortName: cohort.name,
-                      startDate: startDate,
-                    });
-                  }
-                } catch (error) {
-                  console.error('Error fetching patient data:', error);
+                  allPatients.push({
+                    uuid: member.uuid,
+                    patient: person,
+                    cohortName: cohort.name,
+                    startDate: startDate,
+                  });
                 }
+              } catch (error) {
+                console.error('Error fetching patient data:', error);
               }
             }
           }
         }
-
-        setPatients(allPatients);
-      } catch (error) {
-        showNotification({
-          title: t('errorLoadingPatients', 'Error loading patients'),
-          kind: 'error',
-          critical: true,
-          description: error.message,
-        });
-      } finally {
-        setIsLoadingPatients(false);
       }
-    };
 
-    loadPatients();
-  }, [selectedCohortType, t]);
+      setPatients(allPatients);
+    } catch (error) {
+      showNotification({
+        title: t('errorLoadingPatients', 'Error loading patients'),
+        kind: 'error',
+        critical: true,
+        description: error.message,
+      });
+    } finally {
+      setIsLoadingPatients(false);
+    }
+  }, []);
+
+  // Load patients when selected cohort type changes
+  React.useEffect(() => {
+    if (selectedCohortType) {
+      loadPatientsForCohortType(selectedCohortType);
+    } else {
+      setPatients([]);
+    }
+  }, [selectedCohortType, loadPatientsForCohortType]);
+
+  const handleRefresh = useCallback(async () => {
+    if (selectedCohortType) {
+      await loadPatientsForCohortType(selectedCohortType);
+      showSnackbar({
+        isLowContrast: true,
+        kind: 'success',
+        title: t('refreshSuccess', 'Refresh Successful'),
+        subtitle: t('dataRefreshed', 'Data has been refreshed'),
+        autoClose: true,
+      });
+    }
+  }, [selectedCohortType, loadPatientsForCohortType, t]);
 
   const handleRemovePatient = useCallback(
     async (memberUuid: string) => {
@@ -127,7 +128,6 @@ const PatientExit: React.FC = () => {
         return;
       }
 
-      setIsLoading(true);
       try {
         await removePatientFromCohort(memberUuid);
         showSnackbar({
@@ -138,35 +138,9 @@ const PatientExit: React.FC = () => {
           autoClose: true,
         });
 
-        const cohorts = await fetchCohortsWithMembers(selectedCohortType);
-        const allPatients: Array<PatientMember> = [];
-
-        for (const cohort of cohorts) {
-          if (!cohort.voided && cohort.cohortMembers && cohort.cohortMembers.length > 0) {
-            for (const member of cohort.cohortMembers) {
-              if (!member.voided) {
-                try {
-                  const patientUri = member.patient.links[0]?.uri;
-                  if (patientUri) {
-                    const person = await getPatientData(patientUri);
-                    const startDate = new Date(member.startDate).toLocaleDateString();
-
-                    allPatients.push({
-                      uuid: member.uuid,
-                      patient: person,
-                      cohortName: cohort.name,
-                      startDate: startDate,
-                    });
-                  }
-                } catch (error) {
-                  console.error('Error fetching patient data:', error);
-                }
-              }
-            }
-          }
+        if (selectedCohortType) {
+          await loadPatientsForCohortType(selectedCohortType);
         }
-
-        setPatients(allPatients);
       } catch (error) {
         showNotification({
           title: t('errorRemovingPatient', 'Error removing patient'),
@@ -174,11 +148,9 @@ const PatientExit: React.FC = () => {
           critical: true,
           description: error.message,
         });
-      } finally {
-        setIsLoading(false);
       }
     },
-    [t, selectedCohortType]
+    [t, selectedCohortType, loadPatientsForCohortType]
   );
 
   const tableHeaders = useMemo(
@@ -239,6 +211,15 @@ const PatientExit: React.FC = () => {
             ))}
           </Select>
 
+          <Button
+            kind="tertiary"
+            renderIcon={Renew}
+            onClick={handleRefresh}
+            disabled={isLoadingPatients}
+          >
+            {t('refresh', 'Refresh')}
+          </Button>
+
           {isLoadingPatients && (
             <div className={styles.loadingSection}>
               <InlineLoading />
@@ -247,19 +228,7 @@ const PatientExit: React.FC = () => {
         </div>
       </div>
 
-      {!selectedCohortType ? (
-        <div className={styles.emptyState}>
-          <p>{t('selectCohortType', 'Please select a cohort type to view patients')}</p>
-        </div>
-      ) : isLoadingPatients ? (
-        <div className={styles.loadingSection}>
-          <InlineLoading />
-        </div>
-      ) : patients.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p>{t('noPatientsFound', 'No patients found in this cohort')}</p>
-        </div>
-      ) : (
+      {patients.length > 0 ? (
         <DataTable rows={tableRows} headers={tableHeaders}>
           {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
             <TableContainer>
@@ -286,6 +255,12 @@ const PatientExit: React.FC = () => {
             </TableContainer>
           )}
         </DataTable>
+      ) : (
+        !isLoadingPatients && (
+          <div className={styles.emptyState}>
+            <p>{t('noPatientsFound', 'No patients found for this group type')}</p>
+          </div>
+        )
       )}
     </div>
   );

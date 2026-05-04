@@ -1,3 +1,4 @@
+import useSWR from 'swr';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import {
   CohortType,
@@ -7,50 +8,51 @@ import {
 } from './cohort-management.types';
 
 export function useCohortTypes() {
-  const abortController = new AbortController();
+  const apiUrl = '/ws/rest/v1/cohortm/cohorttype?v=default';
+  const { data, error, isLoading } = useSWR<{ results: Array<CohortType> }, Error>(
+    apiUrl,
+    () => openmrsFetch(apiUrl).then((res) => res.json())
+  );
 
-  const fetchCohortTypes = async () => {
-    const response = await openmrsFetch('/ws/rest/v1/cohortm/cohorttype?v=default', {
-      signal: abortController.signal,
-    });
-    return response.data.results;
+  return {
+    cohortTypes: data?.results ?? [],
+    isLoading,
+    isError: error,
   };
-
-  return { fetchCohortTypes, abortController };
 }
 
 export function useCohorts(cohortTypeUuid?: string) {
-  const abortController = new AbortController();
+  const apiUrl = cohortTypeUuid
+    ? `/ws/rest/v1/cohortm/cohort?v=custom:(name,uuid,description,voided,cohortType,startDate)&cohortType=${cohortTypeUuid}`
+    : null;
 
-  const fetchCohorts = async () => {
-    const url = cohortTypeUuid
-      ? `/ws/rest/v1/cohortm/cohort?v=custom:(name,uuid,description,voided,cohortType,startDate)&cohortType=${cohortTypeUuid}`
-      : '/ws/rest/v1/cohortm/cohort?v=custom:(name,uuid,description,voided,cohortType,startDate)';
+  const { data, error, isLoading } = useSWR<{ results: Array<Cohort> }, Error>(
+    apiUrl,
+    apiUrl ? () => openmrsFetch(apiUrl).then((res) => res.json()) : null
+  );
 
-    const response = await openmrsFetch(url, {
-      signal: abortController.signal,
-    });
-    return response.data.results;
+  return {
+    cohorts: data?.results ?? [],
+    isLoading,
+    isError: error,
   };
-
-  return { fetchCohorts, abortController };
 }
 
 export function useCohortsWithMembers(cohortTypeUuid?: string) {
-  const abortController = new AbortController();
+  const apiUrl = cohortTypeUuid
+    ? `/ws/rest/v1/cohortm/cohort?v=custom:(name,cohortMembers,voided)&cohortType=${cohortTypeUuid}`
+    : null;
 
-  const fetchCohortsWithMembers = async () => {
-    const url = cohortTypeUuid
-      ? `/ws/rest/v1/cohortm/cohort?v=custom:(name,cohortMembers,voided)&cohortType=${cohortTypeUuid}`
-      : '/ws/rest/v1/cohortm/cohort?v=custom:(name,cohortMembers,voided)';
+  const { data, error, isLoading } = useSWR<{ results: Array<CohortWithMembers> }, Error>(
+    apiUrl,
+    apiUrl ? () => openmrsFetch(apiUrl).then((res) => res.json()) : null
+  );
 
-    const response = await openmrsFetch(url, {
-      signal: abortController.signal,
-    });
-    return response.data.results;
+  return {
+    cohortsWithMembers: data?.results ?? [],
+    isLoading,
+    isError: error,
   };
-
-  return { fetchCohortsWithMembers, abortController };
 }
 
 export async function createCohort(cohortData: CohortFormData) {
