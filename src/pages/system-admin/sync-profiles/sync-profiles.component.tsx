@@ -16,6 +16,7 @@ import {
   Button,
   OverflowMenuItem,
   Toggle,
+  Pagination,
 } from '@carbon/react';
 import {
   Add,
@@ -31,6 +32,7 @@ import {
   UserHasAccess,
   showNotification,
   showSnackbar,
+  usePagination,
 } from '@openmrs/esm-framework';
 import {
   useSyncProfiles,
@@ -65,6 +67,16 @@ const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
         profile.serverUrl?.toLowerCase().includes(query)
     );
   }, [profiles, searchQuery]);
+
+  // Pagination setup
+  const pageSizes = [10, 20, 30, 40, 50];
+  const [currentPageSize, setPageSize] = useState(10);
+
+  const {
+    goTo,
+    results: paginatedProfiles,
+    currentPage,
+  } = usePagination(filteredProfiles, currentPageSize);
 
   const handleCreateProfile = useCallback(() => {
     setSelectedProfile(undefined);
@@ -215,7 +227,7 @@ const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
 
   const tableRows = useMemo(
     () =>
-      filteredProfiles.map((profile) => ({
+      paginatedProfiles.map((profile) => ({
         id: profile.uuid,
         name: profile.name || '-',
         serverUrl: profile.serverUrl || '-',
@@ -256,7 +268,7 @@ const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
           </div>
         ),
       })),
-    [filteredProfiles, t, handleToggleStatus, handleEditProfile, handleTriggerSync, handleDeleteProfile]
+    [paginatedProfiles, t, handleToggleStatus, handleEditProfile, handleTriggerSync, handleDeleteProfile]
   );
 
   if (isLoading) {
@@ -345,6 +357,23 @@ const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
                   ))}
                 </TableBody>
               </Table>
+              <Pagination
+                forwardText="Next page"
+                backwardText="Previous page"
+                page={currentPage}
+                pageSize={currentPageSize}
+                pageSizes={pageSizes}
+                totalItems={filteredProfiles.length}
+                className={styles.pagination}
+                onChange={({ pageSize, page }) => {
+                  if (pageSize !== currentPageSize) {
+                    setPageSize(pageSize);
+                  }
+                  if (page !== currentPage) {
+                    goTo(page);
+                  }
+                }}
+              />
             </TableContainer>
           )}
         </DataTable>

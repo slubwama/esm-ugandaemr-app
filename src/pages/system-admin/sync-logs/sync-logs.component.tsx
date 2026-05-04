@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataTable,
@@ -16,16 +16,15 @@ import {
   Button,
   DatePicker,
   DatePickerInput,
-  Tile,
   Pagination,
+  Select,
+  SelectItem,
 } from '@carbon/react';
 import {
   ErrorState,
-  useLayoutType,
   usePagination,
 } from '@openmrs/esm-framework';
 import {
-  Renew,
   Checkmark,
   Warning,
   Time,
@@ -38,8 +37,6 @@ import styles from './sync-logs.scss';
 const SyncLogsContent: React.FC = () => {
   const { t } = useTranslation();
   const { logs, isLoading, isError } = useSyncLogs();
-  const isTablet = useLayoutType() === 'tablet';
-  const responsiveSize = isTablet ? 'lg' : 'sm';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSyncType, setSelectedSyncType] = useState('');
@@ -50,6 +47,17 @@ const SyncLogsContent: React.FC = () => {
 
   const pageSizes = [10, 20, 30, 40, 50];
   const [currentPageSize, setPageSize] = useState(10);
+
+  // Extract unique sync task types for the filter dropdown
+  const syncTaskTypes = useMemo(() => {
+    const types = new Set<string>();
+    logs.forEach((log) => {
+      if (log.syncTaskType?.name) {
+        types.add(log.syncTaskType.name);
+      }
+    });
+    return Array.from(types).sort();
+  }, [logs]);
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
@@ -91,8 +99,6 @@ const SyncLogsContent: React.FC = () => {
         return <Checkmark size={16} className={styles.statusSuccess} />;
       case 'failed':
         return <Warning size={16} className={styles.statusFailed} />;
-      case 'in_progress':
-        return <Renew size={16} className={styles.statusInProgress} />;
       default:
         return <Time size={16} className={styles.statusPending} />;
     }
@@ -133,13 +139,26 @@ const SyncLogsContent: React.FC = () => {
     [t]
   );
 
+  const getStatusClass = (status?: string) => {
+    switch (status) {
+      case 'success':
+        return styles.statusSuccess;
+      case 'failed':
+        return styles.statusFailed;
+      case 'in_progress':
+        return styles.statusInProgress;
+      default:
+        return styles.statusPending;
+    }
+  };
+
   const tableRows = useMemo(
     () =>
       paginatedList.map((log: SyncTaskLog, index: number) => ({
         id: log.uuid || String(index),
         syncTaskType: log.syncTaskType?.name || '-',
         status: (
-          <div className={`${styles.statusIndicator} ${styles['status_' + log.status]}`}>
+          <div className={`${styles.statusIndicator} ${getStatusClass(log.status)}`}>
             {getStatusIcon(log.status)}
             <span>{t(log.status || 'unknown', log.status || 'Unknown')}</span>
           </div>
@@ -176,13 +195,8 @@ const SyncLogsContent: React.FC = () => {
           </p>
         </div>
       ) : (
-        <DataTable
-          rows={tableRows}
-          headers={tableHeaders}
-          size={isTablet ? 'lg' : 'sm'}
-          useZebraStyles
-        >
-          {({ rows, headers, getTableProps, getHeaderProps }) => (
+        <DataTable rows={tableRows} headers={tableHeaders}>
+          {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
             <TableContainer className={styles.syncTable}>
               <TableToolbar>
                 <TableToolbarContent className={styles.toolbarContent}>
@@ -191,6 +205,22 @@ const SyncLogsContent: React.FC = () => {
                     onChange={(event) => setSearchQuery(event ? event.toString() : '')}
                     placeholder={t('searchLogs', 'Search logs...')}
                   />
+                  <Select
+                    id="sync-task-type-filter"
+                    labelText=""
+                    defaultValue=""
+                    onChange={(event) => setSelectedSyncType(event.target.value)}
+                    className={styles.syncTypeFilter}
+                  >
+                    <SelectItem value="" text={t('allTaskTypes', 'All Task Types')}>
+                      {t('allTaskTypes', 'All Task Types')}
+                    </SelectItem>
+                    {syncTaskTypes.map((type) => (
+                      <SelectItem key={type} value={type} text={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </Select>
                   <div className={styles.datePicker}>
                     <DatePicker
                       datePickerType="range"
@@ -238,7 +268,7 @@ const SyncLogsContent: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {rows.map((row) => (
-                    <TableRow key={row.id}>
+                    <TableRow {...getRowProps({ row })}>
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
                       ))}
@@ -246,20 +276,6 @@ const SyncLogsContent: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
-              {rows.length === 0 ? (
-                <div className={styles.tileContainer}>
-                  <Tile className={styles.tile}>
-                    <div className={styles.tileContent}>
-                      <p className={styles.content}>
-                        {t('noLogsToDisplay', 'No logs to display')}
-                      </p>
-                      <p className={styles.helper}>
-                        {t('checkFilter', 'Check the filter above')}
-                      </p>
-                    </div>
-                  </Tile>
-                </div>
-              ) : null}
               <Pagination
                 forwardText="Next page"
                 backwardText="Previous page"

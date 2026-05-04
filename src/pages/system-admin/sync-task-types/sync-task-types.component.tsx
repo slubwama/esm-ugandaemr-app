@@ -16,6 +16,7 @@ import {
   Button,
   OverflowMenuItem,
   Toggle,
+  Pagination,
 } from '@carbon/react';
 import {
   Add,
@@ -31,6 +32,7 @@ import {
   UserHasAccess,
   showNotification,
   showSnackbar,
+  usePagination,
 } from '@openmrs/esm-framework';
 import {
   useSyncTaskTypes,
@@ -64,6 +66,16 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
         taskType.taskType?.toLowerCase().includes(query)
     );
   }, [taskTypes, searchQuery]);
+
+  // Pagination setup
+  const pageSizes = [10, 20, 30, 40, 50];
+  const [currentPageSize, setPageSize] = useState(10);
+
+  const {
+    goTo,
+    results: paginatedTaskTypes,
+    currentPage,
+  } = usePagination(filteredTaskTypes, currentPageSize);
 
   const handleCreateTaskType = useCallback(() => {
     setSelectedTaskType(undefined);
@@ -197,7 +209,7 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
 
   const tableRows = useMemo(
     () =>
-      filteredTaskTypes.map((taskType) => ({
+      paginatedTaskTypes.map((taskType) => ({
         id: taskType.uuid,
         name: taskType.name || '-',
         taskType: taskType.taskType || '-',
@@ -239,7 +251,7 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
           </div>
         ),
       })),
-    [filteredTaskTypes, t, handleToggleStatus, handleExecuteTask, handleEditTaskType, handleDeleteTaskType]
+    [paginatedTaskTypes, t, handleToggleStatus, handleExecuteTask, handleEditTaskType, handleDeleteTaskType]
   );
 
   if (isLoading) {
@@ -324,6 +336,23 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
                   ))}
                 </TableBody>
               </Table>
+              <Pagination
+                forwardText="Next page"
+                backwardText="Previous page"
+                page={currentPage}
+                pageSize={currentPageSize}
+                pageSizes={pageSizes}
+                totalItems={filteredTaskTypes.length}
+                className={styles.pagination}
+                onChange={({ pageSize, page }) => {
+                  if (pageSize !== currentPageSize) {
+                    setPageSize(pageSize);
+                  }
+                  if (page !== currentPage) {
+                    goTo(page);
+                  }
+                }}
+              />
             </TableContainer>
           )}
         </DataTable>

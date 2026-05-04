@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DataTable,
+  DataTableSkeleton,
   Table,
   TableHead,
   TableRow,
@@ -15,6 +16,7 @@ import {
   Button,
   OverflowMenuItem,
   Tag,
+  Pagination,
 } from '@carbon/react';
 import {
   Add,
@@ -24,7 +26,7 @@ import {
   Time,
   Restart,
 } from '@carbon/react/icons';
-import { showNotification, showSnackbar } from '@openmrs/esm-framework';
+import { showNotification, showSnackbar, usePagination } from '@openmrs/esm-framework';
 import styles from './schedule-tasks.scss';
 
 interface ScheduledTask {
@@ -89,6 +91,16 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
         task.description?.toLowerCase().includes(query)
     );
   }, [scheduledTasks, searchQuery]);
+
+  // Pagination setup
+  const pageSizes = [10, 20, 30, 40, 50];
+  const [currentPageSize, setPageSize] = useState(10);
+
+  const {
+    goTo,
+    results: paginatedTasks,
+    currentPage,
+  } = usePagination(filteredTasks, currentPageSize);
 
   const handleToggleTaskStatus = useCallback((taskId: string) => {
     setScheduledTasks((prev) =>
@@ -167,7 +179,7 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
 
   const tableRows = useMemo(
     () =>
-      filteredTasks.map((task) => ({
+      paginatedTasks.map((task) => ({
         id: task.id,
         name: task.name,
         schedule: task.schedule,
@@ -198,7 +210,7 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
           </div>
         ),
       })),
-    [filteredTasks, t, getLastStatusIcon, getStatusTag, handleRunNow, handleToggleTaskStatus, handleDeleteTask]
+    [paginatedTasks, t, getLastStatusIcon, getStatusTag, handleRunNow, handleToggleTaskStatus, handleDeleteTask]
   );
 
   return (
@@ -254,6 +266,23 @@ const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = () => {
                   ))}
                 </TableBody>
               </Table>
+              <Pagination
+                forwardText="Next page"
+                backwardText="Previous page"
+                page={currentPage}
+                pageSize={currentPageSize}
+                pageSizes={pageSizes}
+                totalItems={filteredTasks.length}
+                className={styles.pagination}
+                onChange={({ pageSize, page }) => {
+                  if (pageSize !== currentPageSize) {
+                    setPageSize(pageSize);
+                  }
+                  if (page !== currentPage) {
+                    goTo(page);
+                  }
+                }}
+              />
             </TableContainer>
           )}
         </DataTable>
