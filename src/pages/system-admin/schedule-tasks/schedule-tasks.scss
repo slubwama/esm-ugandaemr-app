@@ -1,4 +1,11 @@
-.scheduleTasksContent {
+// Main container for task manager
+.taskManagerContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.scheduleTasksContent,
+.syncTasksContent {
   padding: 2rem;
   width: 100%;
 }
@@ -13,17 +20,23 @@
   gap: 0.5rem;
 }
 
+// Status styles
 .statusWithIcon {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+.statusText {
+  word-break: break-word;
+}
+
 .statusSuccess {
   color: #24a148;
 }
 
-.statusFailed {
+.statusFailed,
+.statusError {
   color: #da1e28;
 }
 
@@ -31,6 +44,11 @@
   color: #f1c21b;
 }
 
+.statusWarning {
+  color: #f1c21b;
+}
+
+// Empty states
 .emptyState {
   text-align: center;
   padding: 3rem 1rem;
@@ -54,4 +72,84 @@
 
 .pagination {
   margin-top: 1rem;
+}
+
+// Tab styles
+.tabIcon {
+  margin-right: 0.5rem;
+}
+
+// Sync Tasks specific styles
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statTile {
+  padding: 1.5rem;
+  background: #f4f4f4;
+  border-radius: 8px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0f62fe;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #525252;
+  font-weight: 500;
+}
+
+.statIconSuccess,
+.statIconError,
+.statIconWarning {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  opacity: 0.3;
+}
+
+.statIconSuccess {
+  color: #24a148;
+}
+
+.statIconError {
+  color: #da1e28;
+}
+
+.statIconWarning {
+  color: #f1c21b;
+}
+
+// Task details section
+.taskDetails {
+  font-size: 0.875rem;
+  max-width: 400px;
+}
+
+.detailRow {
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  strong {
+    display: inline-block;
+    min-width: 100px;
+    color: #525252;
+  }
 }

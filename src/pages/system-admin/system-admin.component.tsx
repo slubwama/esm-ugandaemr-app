@@ -12,10 +12,9 @@ import {
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
 import SyncDashboardContent from './sync-dashboard/sync-dashboard.component';
-import SyncProfilesContent from './sync-profiles/sync-profiles.component';
-import SyncTaskTypesContent from './sync-task-types/sync-task-types.component';
+import SyncProfilesContent from './sync-profiles';
+import SyncTaskTypesContent from './sync-task-types';
 import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
-import SyncLogsContent from './sync-logs/sync-logs.component';
 import SMSSettingsContent from './sms-settings/sms-settings.component';
 import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
 
@@ -25,7 +24,6 @@ type AdminSection =
   | 'sync-profiles'
   | 'sync-task-types'
   | 'schedule-tasks'
-  | 'sync-logs'
   | 'viral-load-upload'
   | 'sms-settings';
 
@@ -49,7 +47,7 @@ const SystemAdminPage: React.FC = () => {
     {
       id: 'sync-task-types' as AdminSection,
       label: t('syncTaskTypes', 'Sync Task Types'),
-      description: t('syncTaskTypesDesc', 'Manage task types for sync operations'),
+      description: t('syncTaskTypesDesc', 'Manage sync task types and view execution history'),
       icon: Settings,
     },
     {
@@ -57,12 +55,6 @@ const SystemAdminPage: React.FC = () => {
       label: t('scheduleTaskManager', 'Schedule Task Manager'),
       description: t('scheduleTaskManagerDesc', 'Schedule and automate recurring tasks'),
       icon: Calendar,
-    },
-    {
-      id: 'sync-logs' as AdminSection,
-      label: t('syncLogs', 'Sync Logs'),
-      description: t('syncLogsDesc', 'View sync operation logs and history'),
-      icon: Document,
     },
     {
       id: 'viral-load-upload' as AdminSection,
@@ -88,8 +80,6 @@ const SystemAdminPage: React.FC = () => {
         return <SyncTaskTypesContent />;
       case 'schedule-tasks':
         return <ScheduleTasksContent />;
-      case 'sync-logs':
-        return <SyncLogsContent />;
       case 'viral-load-upload':
         return <ViralLoadUploadContent />;
       case 'sms-settings':

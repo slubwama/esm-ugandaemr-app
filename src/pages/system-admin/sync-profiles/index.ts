@@ -1,1 +1,1 @@
-export { default } from './sync-profiles.component';
+export { default } from './sync-profiles-wrapper.component';

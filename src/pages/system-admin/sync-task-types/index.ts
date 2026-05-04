@@ -1,1 +1,1 @@
-export { default } from './sync-task-types.component';
+export { default } from './sync-task-types-wrapper.component';
