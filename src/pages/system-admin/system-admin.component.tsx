@@ -9,6 +9,7 @@ import {
   Mobile,
   Dashboard,
   Upload,
+  Group,
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
 import SyncDashboardContent from './sync-dashboard/sync-dashboard.component';
@@ -17,6 +18,7 @@ import SyncTaskTypesContent from './sync-task-types';
 import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
 import SMSSettingsContent from './sms-settings/sms-settings.component';
 import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
+import CohortManagementContent from './cohort-management';
 
 type AdminSection =
   | 'overview'
@@ -24,6 +26,7 @@ type AdminSection =
   | 'sync-profiles'
   | 'sync-task-types'
   | 'schedule-tasks'
+  | 'cohort-management'
   | 'viral-load-upload'
   | 'sms-settings';
 
@@ -57,6 +60,12 @@ const SystemAdminPage: React.FC = () => {
       icon: Calendar,
     },
     {
+      id: 'cohort-management' as AdminSection,
+      label: t('cohortManagement', 'Cohort Management'),
+      description: t('cohortManagementDesc', 'Manage DSD refill groups and patient enrollment'),
+      icon: Group,
+    },
+    {
       id: 'viral-load-upload' as AdminSection,
       label: t('viralLoadUpload', 'Viral Load Upload'),
       description: t('viralLoadUploadDesc', 'Upload viral load test results from CPHL'),
@@ -80,6 +89,8 @@ const SystemAdminPage: React.FC = () => {
         return <SyncTaskTypesContent />;
       case 'schedule-tasks':
         return <ScheduleTasksContent />;
+      case 'cohort-management':
+        return <CohortManagementContent />;
       case 'viral-load-upload':
         return <ViralLoadUploadContent />;
       case 'sms-settings':
