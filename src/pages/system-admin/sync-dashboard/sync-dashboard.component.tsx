@@ -4,359 +4,501 @@ import {
   Button,
   Tile,
   InlineLoading,
-  Tag,
 } from '@carbon/react';
 import {
-  Dashboard,
-  Connect,
-  Settings,
-  Calendar,
-  Document,
-  Mobile,
-  Upload,
+  Renew,
   Checkmark,
   Warning,
-  Activity,
-  Flash,
-  ArrowRight,
+  Error,
+  Information,
   ArrowUp,
-  Security,
-  ChartBullet,
+  ArrowDown,
+  Activity,
+  Dashboard as DashboardIcon,
+  Timer,
+  Flash,
+  Wifi,
+  ChevronRight,
 } from '@carbon/react/icons';
-import { useNavigate } from 'react-router-dom';
-import { useLayoutType } from '@openmrs/esm-framework';
+import {
+  useDashboardData,
+  dismissAlert,
+  triggerProfileSync,
+} from './sync-dashboard.resources';
+import {
+  SyncDashboardMetrics,
+  type SyncAlert,
+  type SyncActivity,
+  type ActiveSyncOperation,
+} from './sync-dashboard.types';
+import { showNotification, showSnackbar, navigate } from '@openmrs/esm-framework';
 import styles from './sync-dashboard.scss';
 
-interface AdminSection {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  route: string;
-  badge?: string;
-  status?: 'active' | 'warning' | 'error';
-  stats?: {
-    label: string;
-    value: string | number;
-  }[];
-}
-
-interface QuickAction {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  route: string;
-  primary?: boolean;
-}
-
-const SystemAdminLanding: React.FC = () => {
+const SyncDashboardContent: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const isTablet = useLayoutType() === 'tablet';
+  const { dashboardData, isLoading, isError, mutate } = useDashboardData();
 
-  const handleNavigate = useCallback((route: string) => {
-    navigate(route);
-  }, [navigate]);
+  const handleDismissAlert = useCallback(
+    async (alertId: string) => {
+      try {
+        await dismissAlert(alertId);
+        showSnackbar({
+          isLowContrast: true,
+          kind: 'success',
+          title: t('alertDismissed', 'Alert dismissed'),
+          autoClose: true,
+        });
+        mutate();
+      } catch (error) {
+        showNotification({
+          title: t('errorDismissingAlert', 'Error dismissing alert'),
+          kind: 'error',
+          description: error.message,
+        });
+      }
+    },
+    [mutate, t]
+  );
 
-  const adminSections: AdminSection[] = useMemo(
-    () => [
-      {
-        id: 'sync-dashboard',
-        title: t('syncDashboard', 'Sync Dashboard'),
-        description: t('syncDashboardDesc', 'Monitor sync operations, view metrics, and track system performance'),
-        icon: Dashboard,
-        route: '/system-admin/sync-dashboard',
-        status: 'active',
-        stats: [
-          { label: t('activeSyncs', 'Active Syncs'), value: 3 },
-          { label: t('successRate', 'Success Rate'), value: '98.5%' },
-        ],
-      },
-      {
-        id: 'sync-profiles',
-        title: t('syncProfiles', 'Sync Profiles'),
-        description: t('syncProfilesDesc', 'Configure and manage FHIR sync profiles for data exchange'),
-        icon: Connect,
-        route: '/system-admin/sync-profiles',
-        badge: '5',
-        stats: [
-          { label: t('totalProfiles', 'Total Profiles'), value: 5 },
-          { label: t('activeProfiles', 'Active'), value: 4 },
-        ],
-      },
-      {
-        id: 'sync-task-types',
-        title: t('syncTaskTypes', 'Sync Task Types'),
-        description: t('syncTaskTypesDesc', 'Manage task types for sync operations and data processing'),
-        icon: Settings,
-        route: '/system-admin/sync-task-types',
-        stats: [
-          { label: t('taskTypes', 'Task Types'), value: 12 },
-          { label: t('enabled', 'Enabled'), value: 10 },
-        ],
-      },
-      {
-        id: 'schedule-tasks',
-        title: t('scheduleTaskManager', 'Schedule Task Manager'),
-        description: t('scheduleTaskManagerDesc', 'Schedule and automate recurring tasks and maintenance operations'),
-        icon: Calendar,
-        route: '/system-admin/schedule-tasks',
-        status: 'active',
-        stats: [
-          { label: t('scheduledTasks', 'Scheduled Tasks'), value: 8 },
-          { label: t('activeTasks', 'Active'), value: 6 },
-        ],
-      },
-      {
-        id: 'sync-logs',
-        title: t('syncLogs', 'Sync Logs'),
-        description: t('syncLogsDesc', 'View detailed sync operation logs and troubleshooting history'),
-        icon: Document,
-        route: '/system-admin/sync-logs',
-        badge: '24h',
-        stats: [
-          { label: t('recentLogs', 'Last 24h'), value: 156 },
-          { label: t('errors', 'Errors'), value: 2 },
-        ],
-      },
-      {
-        id: 'viral-load-upload',
-        title: t('viralLoadUpload', 'Viral Load Upload'),
-        description: t('viralLoadUploadDesc', 'Upload and process viral load test results from CPHL'),
-        icon: Upload,
-        route: '/system-admin/viral-load-upload',
-        stats: [
-          { label: t('uploadsToday', 'Uploads Today'), value: 23 },
-          { label: t('processed', 'Processed'), value: 21 },
-        ],
-      },
-      {
-        id: 'sms-settings',
-        title: t('smsSettings', 'SMS Settings'),
-        description: t('smsSettingsDesc', 'Configure SMS gateway and appointment reminder settings'),
-        icon: Mobile,
-        route: '/system-admin/sms-settings',
-        status: 'active',
-        stats: [
-          { label: t('status', 'Status'), value: 'Connected' },
-          { label: t('sentToday', 'Sent Today'), value: 145 },
-        ],
-      },
-    ],
+  const handleQuickAction = useCallback(
+    async (action: string) => {
+      switch (action) {
+        case 'trigger-all':
+          // Implement trigger all syncs
+          showSnackbar({
+            isLowContrast: true,
+            kind: 'info',
+            title: t('triggeringAllSyncs', 'Triggering all sync profiles'),
+            autoClose: true,
+          });
+          break;
+        case 'view-logs':
+          navigate({ to: '/openmrs/spa/system-admin/sync-logs' });
+          break;
+        case 'view-profiles':
+          navigate({ to: '/openmrs/spa/system-admin/sync-profiles' });
+          break;
+        case 'view-tasks':
+          navigate({ to: '/openmrs/spa/system-admin/sync-task-types' });
+          break;
+        default:
+          break;
+      }
+    },
     [t]
   );
 
-  const quickActions: QuickAction[] = useMemo(
-    () => [
-      {
-        id: 'trigger-sync',
-        label: t('triggerSync', 'Trigger Sync'),
-        description: t('triggerSyncDesc', 'Manually start sync operations'),
-        icon: Activity,
-        route: '/system-admin/sync-profiles',
-        primary: true,
-      },
-      {
-        id: 'view-logs',
-        label: t('viewLogs', 'View Logs'),
-        description: t('viewLogsDesc', 'Check sync operation history'),
-        icon: Document,
-        route: '/system-admin/sync-logs',
-      },
-      {
-        id: 'add-profile',
-        label: t('addProfile', 'Add Profile'),
-        description: t('addProfileDesc', 'Create new sync profile'),
-        icon: Connect,
-        route: '/system-admin/sync-profiles',
-      },
-      {
-        id: 'schedule-task',
-        label: t('scheduleTask', 'Schedule Task'),
-        description: t('scheduleTaskDesc', 'Set up automated tasks'),
-        icon: Calendar,
-        route: '/system-admin/schedule-tasks',
-      },
-    ],
-    [t]
-  );
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <Checkmark size={16} className={styles.successIcon} />;
+      case 'failed':
+        return <Error size={16} className={styles.errorIcon} />;
+      case 'in_progress':
+        return <Renew size={16} className={styles.inProgressIcon} />;
+      default:
+        return <Warning size={16} className={styles.warningIcon} />;
+    }
+  };
 
-  const systemMetrics = useMemo(
-    () => [
-      {
-        label: t('systemStatus', 'System Status'),
-        value: t('operational', 'Operational'),
-        icon: Checkmark,
-        type: 'success' as const,
-      },
-      {
-        label: t('activeSyncs', 'Active Syncs'),
-        value: '3',
-        icon: Activity,
-        type: 'info' as const,
-      },
-      {
-        label: t('successRate', 'Success Rate'),
-        value: '98.5%',
-        icon: ArrowUp,
-        type: 'success' as const,
-      },
-      {
-        label: t('pendingActions', 'Pending Actions'),
-        value: '2',
-        icon: Warning,
-        type: 'warning' as const,
-      },
-    ],
-    [t]
-  );
+  const getSeverityIcon = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return <Error size={20} className={styles.criticalIcon} />;
+      case 'warning':
+        return <Warning size={20} className={styles.warningIcon} />;
+      default:
+        return <Information size={20} className={styles.infoIcon} />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className={styles.dashboardContent}>
+        <div className={styles.loadingState}>
+          <InlineLoading description={t('loadingDashboard', 'Loading dashboard...')} />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !dashboardData) {
+    return (
+      <div className={styles.dashboardContent}>
+        <Tile className={styles.errorState}>
+          <Error size={48} className={styles.errorIcon} />
+          <h3>{t('errorLoadingDashboard', 'Error loading dashboard')}</h3>
+          <p>{t('failedToLoadDashboard', 'Failed to load dashboard data. Please try again.')}</p>
+          <Button onClick={() => mutate()}>{t('retry', 'Retry')}</Button>
+        </Tile>
+      </div>
+    );
+  }
+
+  const {
+    metrics = {
+      totalSyncs: 0,
+      successfulSyncs: 0,
+      failedSyncs: 0,
+      inProgressSyncs: 0,
+      successRate: 0,
+      averageResponseTime: 0,
+      lastSyncTime: new Date().toISOString(),
+      uptimePercentage: 0,
+    },
+    alerts = [],
+    recentActivities = [],
+    activeOperations = [],
+  } = dashboardData;
 
   return (
-    <div className={styles.landingContainer}>
-      {/* Welcome Header */}
-      <div className={styles.welcomeHeader}>
-        <div className={styles.headerContent}>
-          <h1>{t('systemAdmin', 'System Administration')}</h1>
-          <p className={styles.headerDescription}>
-            {t('systemAdminWelcome', 'Welcome to System Administration. Manage sync operations, configure settings, and monitor system performance.')}
-          </p>
-        </div>
-        <div className={styles.headerActions}>
-          <Button kind="secondary" size={isTablet ? 'lg' : 'md'} renderIcon={Activity} onClick={() => handleNavigate('/system-admin/sync-logs')}>
-            {t('viewLogs', 'View Logs')}
-          </Button>
-          <Button kind="primary" size={isTablet ? 'lg' : 'md'} renderIcon={Settings} onClick={() => handleNavigate('/system-admin/sync-profiles')}>
-            {t('manageSettings', 'Manage Settings')}
-          </Button>
-        </div>
-      </div>
-
-      {/* System Metrics */}
-      <div className={styles.metricsSection}>
-        {systemMetrics.map((metric, index) => (
-          <div key={index} className={`${styles.metricCard} ${styles[metric.type]}`}>
-            <div className={styles.metricIcon}>
-              <metric.icon size={24} />
-            </div>
-            <div className={styles.metricContent}>
-              <div className={styles.metricValue}>{metric.value}</div>
-              <div className={styles.metricLabel}>{metric.label}</div>
-            </div>
+    <div className={styles.dashboardContent}>
+      <div className={styles.dashboardContainer}>
+        {/* Header */}
+        <div className={styles.dashboardHeader}>
+          <div>
+            <h1>{t('syncDashboard', 'Sync Dashboard')}</h1>
+            <p className={styles.dashboardDescription}>
+              {t('syncDashboardDesc', 'Monitor and manage sync operations')}
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className={styles.quickActionsSection}>
-        <h2 className={styles.sectionTitle}>{t('quickActions', 'Quick Actions')}</h2>
-        <div className={styles.actionsGrid}>
-          {quickActions.map((action) => (
-            <div
-              key={action.id}
-              className={`${styles.actionCard} ${action.primary ? styles.primaryAction : ''}`}
-              onClick={() => handleNavigate(action.route)}
-              role="button"
-              tabIndex={0}
+          <div className={styles.headerActions}>
+            <Button
+              kind="secondary"
+              onClick={() => mutate()}
+              renderIcon={Renew}
             >
-              <div className={styles.actionIcon}>
-                <action.icon size={32} />
-              </div>
-              <div className={styles.actionContent}>
-                <div className={styles.actionLabel}>{action.label}</div>
-                <div className={styles.actionDescription}>{action.description}</div>
-              </div>
-              <ArrowRight size={20} className={styles.actionArrow} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Admin Sections Grid */}
-      <div className={styles.sectionsSection}>
-        <h2 className={styles.sectionTitle}>{t('adminSections', 'Administration Sections')}</h2>
-        <div className={styles.sectionsGrid}>
-          {adminSections.map((section) => {
-            const Icon = section.icon;
-            return (
-              <div
-                key={section.id}
-                className={styles.sectionCard}
-                onClick={() => handleNavigate(section.route)}
-                role="button"
-                tabIndex={0}
-              >
-                <div className={styles.sectionHeader}>
-                  <div className={styles.sectionIcon}>
-                    <Icon size={32} />
-                  </div>
-                  {section.badge && (
-                    <Tag type="blue" className={styles.sectionBadge}>
-                      {section.badge}
-                    </Tag>
-                  )}
-                  {section.status && (
-                    <div className={`${styles.statusIndicator} ${styles[section.status]}`} />
-                  )}
-                </div>
-
-                <div className={styles.sectionContent}>
-                  <h3 className={styles.sectionTitle}>{section.title}</h3>
-                  <p className={styles.sectionDescription}>{section.description}</p>
-                </div>
-
-                {section.stats && (
-                  <div className={styles.sectionStats}>
-                    {section.stats.map((stat, index) => (
-                      <div key={index} className={styles.stat}>
-                        <div className={styles.statValue}>{stat.value}</div>
-                        <div className={styles.statLabel}>{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className={styles.sectionFooter}>
-                  <span className={styles.accessLink}>
-                    {t('access', 'Access')}
-                    <ArrowRight size={16} />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* System Info */}
-      <div className={styles.infoSection}>
-        <Tile className={styles.infoTile}>
-          <div className={styles.infoHeader}>
-            <Security size={20} />
-            <h3>{t('systemInfo', 'System Information')}</h3>
+              {t('refresh', 'Refresh')}
+            </Button>
           </div>
-          <div className={styles.infoGrid}>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>{t('version', 'Version')}:</span>
-              <span className={styles.infoValue}>1.0.4</span>
+        </div>
+
+        {/* Metrics Grid */}
+        <div className={styles.metricsGrid}>
+          <MetricCard
+            title={t('totalSyncs', 'Total Syncs')}
+            value={metrics.totalSyncs}
+            change={`+${metrics.successRate}%`}
+            icon={DashboardIcon}
+            type="info"
+          />
+          <MetricCard
+            title={t('successfulSyncs', 'Successful')}
+            value={metrics.successfulSyncs}
+            change={t('successRate', '{{rate}}% success rate', { rate: metrics.successRate })}
+            icon={Checkmark}
+            type="success"
+          />
+          <MetricCard
+            title={t('failedSyncs', 'Failed')}
+            value={metrics.failedSyncs}
+            change={t('needsAttention', 'Needs attention')}
+            icon={Error}
+            type="error"
+          />
+          <MetricCard
+            title={t('inProgress', 'In Progress')}
+            value={metrics.inProgressSyncs}
+            change={t('activelySyncing', 'Actively syncing')}
+            icon={Activity}
+            type="warning"
+          />
+          <MetricCard
+            title={t('avgResponseTime', 'Avg Response Time')}
+            value={`${metrics.averageResponseTime}ms`}
+            change={t('performant', 'Performant')}
+            icon={Flash}
+            type="info"
+          />
+          <MetricCard
+            title={t('uptime', 'Uptime')}
+            value={`${metrics.uptimePercentage}%`}
+            change={t('reliable', 'Reliable')}
+            icon={Wifi}
+            type="success"
+          />
+        </div>
+
+        {/* Quick Actions */}
+        <div className={styles.quickActionsPanel}>
+          <h2>{t('quickActions', 'Quick Actions')}</h2>
+          <div className={styles.actionsGrid}>
+            <QuickActionCard
+              icon={Renew}
+              label={t('triggerAllSyncs', 'Trigger All Syncs')}
+              description={t('startAllSyncProfiles', 'Start all sync profiles')}
+              onClick={() => handleQuickAction('trigger-all')}
+            />
+            <QuickActionCard
+              icon={Activity}
+              label={t('viewLogs', 'View Sync Logs')}
+              description={t('viewSyncOperationLogs', 'View sync operation logs')}
+              onClick={() => handleQuickAction('view-logs')}
+            />
+            <QuickActionCard
+              icon={DashboardIcon}
+              label={t('manageProfiles', 'Manage Profiles')}
+              description={t('configureSyncProfiles', 'Configure sync profiles')}
+              onClick={() => handleQuickAction('view-profiles')}
+            />
+            <QuickActionCard
+              icon={Timer}
+              label={t('scheduleTasks', 'Schedule Tasks')}
+              description={t('manageScheduledTasks', 'Manage scheduled tasks')}
+              onClick={() => handleQuickAction('view-tasks')}
+            />
+          </div>
+        </div>
+
+        {/* Alerts Section */}
+        {alerts.length > 0 && (
+          <div className={styles.alertsSection}>
+            <div className={styles.sectionHeader}>
+              <h2>{t('alerts', 'Alerts')}</h2>
+              <Button kind="ghost" size="sm">
+                {t('viewAll', 'View All')} ({alerts.length})
+              </Button>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>{t('lastSync', 'Last Sync')}:</span>
-              <span className={styles.infoValue}>2 minutes ago</span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>{t('uptime', 'Uptime')}:</span>
-              <span className={styles.infoValue}>99.9%</span>
-            </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>{t('environment', 'Environment')}:</span>
-              <span className={styles.infoValue}>Development</span>
+            <div className={styles.alertsList}>
+              {alerts.slice(0, 3).map((alert) => (
+                <AlertCard
+                  key={alert.id}
+                  alert={alert}
+                  onDismiss={() => handleDismissAlert(alert.id)}
+                  severityIcon={getSeverityIcon(alert.severity)}
+                />
+              ))}
             </div>
           </div>
-        </Tile>
+        )}
+
+        {/* Active Operations */}
+        {activeOperations.length > 0 && (
+          <div className={styles.activeOperationsSection}>
+            <div className={styles.sectionHeader}>
+              <h2>{t('activeOperations', 'Active Operations')}</h2>
+              <Button kind="ghost" size="sm">
+                {t('viewAll', 'View All')} ({activeOperations.length})
+              </Button>
+            </div>
+            <div className={styles.operationsList}>
+              {activeOperations.slice(0, 3).map((operation) => (
+                <OperationCard key={operation.id} operation={operation} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Activities */}
+        <div className={styles.activitiesSection}>
+          <div className={styles.sectionHeader}>
+            <h2>{t('recentActivities', 'Recent Activities')}</h2>
+            <Button
+              kind="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/openmrs/spa/system-admin/sync-logs' })}
+              renderIcon={ChevronRight}
+            >
+              {t('viewAllLogs', 'View All Logs')}
+            </Button>
+          </div>
+          <div className={styles.activitiesTimeline}>
+            {recentActivities.length > 0 ? (
+              recentActivities.slice(0, 5).map((activity) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  statusIcon={getStatusIcon(activity.type)}
+                />
+              ))
+            ) : (
+              <div className={styles.emptyState}>
+                <Activity size={48} className={styles.emptyIcon} />
+                <h3 className={styles.emptyTitle}>
+                  {t('noRecentActivities', 'No Recent Activities')}
+                </h3>
+                <p className={styles.emptyDescription}>
+                  {t('noRecentActivitiesDesc', 'Sync activities will appear here')}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default SystemAdminLanding;
+// Helper Components
+interface MetricCardProps {
+  title: string;
+  value: number | string;
+  change: string;
+  icon: React.ComponentType<any>;
+  type: 'success' | 'warning' | 'error' | 'info';
+}
+
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, change, icon: Icon, type }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={styles.metricCard}>
+      <div className={styles.metricHeader}>
+        <span className={styles.metricTitle}>{title}</span>
+        <div className={`${styles.metricIcon} ${styles[type]}`}>
+          <Icon size={20} />
+        </div>
+      </div>
+      <div className={styles.metricValue}>{value}</div>
+      <div className={`${styles.metricChange} ${type === 'success' ? styles.positive : type === 'error' ? styles.negative : ''}`}>
+        {change}
+      </div>
+    </div>
+  );
+};
+
+interface AlertCardProps {
+  alert: SyncAlert;
+  onDismiss: () => void;
+  severityIcon: React.ReactNode;
+}
+
+const AlertCard: React.FC<AlertCardProps> = ({ alert, onDismiss, severityIcon }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={`${styles.alertItem} ${styles[alert.severity]}`}>
+      <div className={styles.alertIcon}>{severityIcon}</div>
+      <div className={styles.alertContent}>
+        <div className={styles.alertTitle}>{alert.title}</div>
+        <div className={styles.alertMessage}>{alert.message}</div>
+        <div className={styles.alertMeta}>
+          <span>{new Date(alert.timestamp).toLocaleString()}</span>
+          {alert.profileName && <span>• {alert.profileName}</span>}
+        </div>
+      </div>
+      <div className={styles.alertActions}>
+        <Button kind="ghost" size="sm" onClick={onDismiss}>
+          {t('dismiss', 'Dismiss')}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+interface OperationCardProps {
+  operation: ActiveSyncOperation;
+}
+
+const OperationCard: React.FC<OperationCardProps> = ({ operation }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={styles.operationCard}>
+      <div className={styles.operationHeader}>
+        <span className={styles.operationName}>{operation.profileName}</span>
+        <div className={styles.operationStatus}>
+          <span className={`${styles.statusBadge} ${styles[operation.status]}`}>
+            {t(operation.status, operation.status)}
+          </span>
+        </div>
+      </div>
+      <div className={styles.operationProgress}>
+        <div className={styles.progressInfo}>
+          <span>
+            {operation.recordsProcessed} / {operation.totalRecords} {t('records', 'records')}
+          </span>
+          <span>{operation.progress}%</span>
+        </div>
+        <div className={styles.progressBar}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${operation.progress}%` }}
+          />
+        </div>
+      </div>
+      <div className={styles.operationMeta}>
+        <span>{t('started', 'Started')}: {new Date(operation.startTime).toLocaleTimeString()}</span>
+        {operation.estimatedCompletion && (
+          <span>
+            {t('estimatedCompletion', 'Est. completion')}: {new Date(operation.estimatedCompletion).toLocaleTimeString()}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+interface ActivityItemProps {
+  activity: SyncActivity;
+  statusIcon: React.ReactNode;
+}
+
+const ActivityItem: React.FC<ActivityItemProps> = ({ activity, statusIcon }) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={styles.activityItem}>
+      <div className={`${styles.activityMarker} ${styles[activity.type]}`} />
+      <div className={styles.activityContent}>
+        <div className={styles.activityHeader}>
+          <span className={styles.activityType}>{activity.profileName}</span>
+          <span className={styles.activityTime}>
+            {new Date(activity.timestamp).toLocaleString()}
+          </span>
+        </div>
+        <div className={styles.activityDetails}>
+          {activity.taskType && `${activity.taskType} • `}
+          {t(activity.status, activity.status)}
+        </div>
+        {activity.recordsProcessed && (
+          <div className={styles.activityStats}>
+            <div className={styles.stat}>
+              <Activity size={12} />
+              <span>
+                {activity.recordsProcessed} {t('records', 'records')}
+              </span>
+            </div>
+            {activity.duration && (
+              <div className={styles.stat}>
+                <Timer size={12} />
+                <span>{activity.duration}s</span>
+              </div>
+            )}
+          </div>
+        )}
+        {activity.errorMessage && (
+          <div className={styles.errorMessage}>{activity.errorMessage}</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+interface QuickActionCardProps {
+  icon: React.ComponentType<any>;
+  label: string;
+  description: string;
+  onClick: () => void;
+}
+
+const QuickActionCard: React.FC<QuickActionCardProps> = ({
+  icon: Icon,
+  label,
+  description,
+  onClick,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className={styles.quickActionCard} onClick={onClick} role="button" tabIndex={0}>
+      <div className={styles.actionIcon}>
+        <Icon size={24} />
+      </div>
+      <div className={styles.actionLabel}>{label}</div>
+      <div className={styles.actionDescription}>{description}</div>
+    </div>
+  );
+};
+
+export default SyncDashboardContent;
