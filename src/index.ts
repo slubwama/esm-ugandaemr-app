@@ -7,7 +7,6 @@ import { configSchema } from "./config-schema";
 import { moduleName } from "./constants";
 
 import formBuilderAppMenu from "./menu-app-items/form-builder-app-item/form-builder-app-item.component";
-import systemInfoAppMenu from "./menu-app-items/system-info-app-item/system-info-app-item.component";
 import systemAdminAppMenu from "./menu-app-items/system-admin-item/system-admin-item.component";
 import legacyAdminAppMenu from "./menu-app-items/legacy-admin-item/legacy-admin-item.component";
 import cohortBuilderAppMenu from "./menu-app-items/cohort-builder-item/cohort-builder-item.component";
@@ -42,7 +41,6 @@ const options = {
 };
 
 export const formBuilderAppMenuItem = getSyncLifecycle(formBuilderAppMenu, options);
-export const systemInfoAppMenuItem = getSyncLifecycle(systemInfoAppMenu, options);
 export const systemAdminAppMenuItem = getSyncLifecycle(systemAdminAppMenu, options);
 export const legacyAdminAppMenuItem = getSyncLifecycle(legacyAdminAppMenu, options);
 export const cohortBuilderAppMenuItem = getSyncLifecycle(cohortBuilderAppMenu, options);
@@ -62,14 +60,6 @@ export function startupApp() {
       }),
   });
 }
-
-export const systemInfoPage = getAsyncLifecycle(
-  () => import("./pages/system-info/system-info.component"),
-  {
-    featureName: "system info page",
-    moduleName,
-  },
-);
 
 export const systemAdminPage = getAsyncLifecycle(
   () => import("./pages/system-admin/system-admin.component"),
@@ -96,7 +86,7 @@ export const taskTypeDetailModal = getAsyncLifecycle(
 );
 
 export const retrieveFacilityCodeModal = getAsyncLifecycle(
-  () => import("./pages/system-info/facility-modal.component"),
+  () => import("./pages/system-admin/about-systems/facility-modal.component"),
   {
     featureName: "retrieve facility code modal",
     moduleName,
@@ -104,7 +94,7 @@ export const retrieveFacilityCodeModal = getAsyncLifecycle(
 );
 
 export const updateFacilityCodeAlert = getAsyncLifecycle(
-  () => import("./pages/system-info/update-facility-code-alert"),
+  () => import("./pages/system-admin/about-systems/update-facility-code-alert"),
   {
     featureName: "update facility code alert",
     moduleName,

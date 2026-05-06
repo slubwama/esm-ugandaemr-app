@@ -6,10 +6,6 @@
   },
   "pages": [
     {
-      "component": "systemInfoPage",
-      "route": "about"
-    },
-    {
       "component": "systemAdminPage",
       "route": "system-admin"
     }
@@ -77,14 +73,6 @@
       "slot": "app-menu-item-slot",
       "meta": {
         "name": "Form Builder"
-      }
-    },
-    {
-      "name": "system-info-app-menu-item",
-      "component": "systemInfoAppMenuItem",
-      "slot": "app-menu-item-slot",
-      "meta": {
-        "name": "System Info"
       }
     },
     {

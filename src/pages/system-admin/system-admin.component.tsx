@@ -11,9 +11,9 @@ import {
   Upload,
   Group,
   Renew,
+  Information,
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
-import SyncDashboardContent from './sync-dashboard/sync-dashboard.component';
 import SyncProfilesContent from './sync-profiles';
 import SyncTaskTypesContent from './sync-task-types';
 import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
@@ -21,16 +21,17 @@ import SMSSettingsContent from './sms-settings';
 import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
 import CohortManagementContent from './cohort-management';
 import SystemUpgradesContent from './system-upgrades';
+import AboutSystemsContent from './about-systems/about-systems.component';
 
 type AdminSection =
   | 'overview'
-  | 'sync-dashboard'
   | 'sync-profiles'
   | 'sync-task-types'
   | 'schedule-tasks'
   | 'cohort-management'
   | 'viral-load-upload'
   | 'sms-settings'
+  | 'about-systems'
   | 'system-upgrades';
 
 const SystemAdminPage: React.FC = () => {
@@ -38,12 +39,6 @@ const SystemAdminPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('overview');
 
   const navItems = [
-    {
-      id: 'sync-dashboard' as AdminSection,
-      label: t('syncDashboard', 'Sync Dashboard'),
-      description: t('syncDashboardDesc', 'Overview of sync operations and monitoring'),
-      icon: Dashboard,
-    },
     {
       id: 'sync-profiles' as AdminSection,
       label: t('syncProfiles', 'Sync Profiles'),
@@ -86,12 +81,16 @@ const SystemAdminPage: React.FC = () => {
       description: t('systemUpgradesDesc', 'Execute system upgrades and update EMR components'),
       icon: Renew,
     },
+    {
+      id: 'about-systems' as AdminSection,
+      label: t('aboutSystems', 'About Systems'),
+      description: t('aboutSystemsDesc', 'View system information, version details, and facility code'),
+      icon: Information,
+    },
   ];
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'sync-dashboard':
-        return <SyncDashboardContent />;
       case 'sync-profiles':
         return <SyncProfilesContent />;
       case 'sync-task-types':
@@ -106,6 +105,8 @@ const SystemAdminPage: React.FC = () => {
         return <SMSSettingsContent />;
       case 'system-upgrades':
         return <SystemUpgradesContent />;
+      case 'about-systems':
+        return <AboutSystemsContent />;
       default:
         return (
           <div className={styles.overviewContent}>
@@ -144,6 +145,20 @@ const SystemAdminPage: React.FC = () => {
           <h2>{t('systemAdmin', 'System Admin')}</h2>
         </div>
         <nav className={styles.sidebarNav}>
+          {/* Sync Dashboard - Links to overview */}
+          <button
+            className={`${styles.navItem} ${activeSection === 'overview' ? styles.active : ''}`}
+            onClick={() => setActiveSection('overview')}
+          >
+            <Dashboard size={20} className={styles.navIcon} />
+            <div className={styles.navContent}>
+              <span className={styles.navLabel}>{t('syncDashboard', 'Sync Dashboard')}</span>
+              <span className={styles.navDescription}>
+                {t('syncDashboardDesc', 'Overview of sync operations and monitoring')}
+              </span>
+            </div>
+            {activeSection === 'overview' && <ChevronRight size={16} className={styles.navArrow} />}
+          </button>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
