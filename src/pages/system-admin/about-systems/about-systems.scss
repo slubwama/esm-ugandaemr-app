@@ -1,0 +1,66 @@
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.overall-info-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 0.5px solid #c6c6c6;
+    max-width: 28%;
+    padding: 1rem;
+
+    .info-title {
+        display: flex;
+        align-items: center;
+        padding-bottom: 0.25rem;
+        margin-bottom: 0.25rem;
+        border-bottom: 0.5px solid #c6c6c6;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .info-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 0.25rem;
+        font-size: 90%;
+    }
+
+    .divUpdateContent {
+        display: flex;
+    }
+}
+
+.system-info-table {
+    width: 100%;
+    margin-top: 1rem;
+
+    .bx--data-table-container {
+        border: 0.5px solid #c6c6c6;
+    }
+}
+
+.pagination {
+    margin-top: 1rem;
+}
+
+.emptyState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    color: #525252;
+}
+
+.results {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.8rem;
+}
+
+.no-results {
+    margin-top: 2rem;
+}
+
+// add css for different screen sizes
