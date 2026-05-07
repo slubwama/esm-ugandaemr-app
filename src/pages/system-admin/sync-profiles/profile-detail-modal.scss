@@ -24,8 +24,36 @@
 .cardHeader {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   color: #161616;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: #525252;
+  margin-bottom: 1.5rem;
+  margin-top: -0.5rem;
+}
+
+.filterSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+
+  &:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
+.filterSectionHeader {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #525252;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
 }
 
 .formField {

@@ -82,7 +82,6 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
     caseBasedPrimaryResourceType: '',
     caseBasedPrimaryResourceTypeId: '',
     patientIdentifierType: '',
-    identifierSourceId: '',
     resourceSearchParameter: {},
     syncLimit: 50,
     searchable: false,
@@ -258,7 +257,6 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
         caseBasedPrimaryResourceType: profile.caseBasedPrimaryResourceType || '',
         caseBasedPrimaryResourceTypeId: profile.caseBasedPrimaryResourceTypeId || '',
         patientIdentifierType: patientIdentifierTypeValue,
-        identifierSourceId: profile.identifierSourceId || '',
         resourceSearchParameter: parsedResourceSearchParameter,
         syncLimit: profile.syncLimit ?? 50,
         searchable: profile.searchable ?? false,
@@ -290,7 +288,6 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
         caseBasedPrimaryResourceType: '',
         caseBasedPrimaryResourceTypeId: '',
         patientIdentifierType: '',
-        identifierSourceId: '',
         resourceSearchParameter: {},
         syncLimit: 50,
         searchable: false,
@@ -440,8 +437,18 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
         await testSyncConnection(profile.uuid);
         setTestResult({ success: true, message: t('connectionSuccessful', 'Connection successful!') });
       }
-    } catch (error) {
-      setTestResult({ success: false, message: t('connectionFailed', 'Connection failed: ') + error.message });
+    } catch (error: any) {
+      let errorMessage = error?.message || t('unknownError', 'An unknown error occurred');
+
+      // Clean up common error prefixes
+      errorMessage = errorMessage
+        .replace(/^Error testing connection:\s*/i, '')
+        .replace(/^Failed to test connection:\s*/i, '');
+
+      setTestResult({
+        success: false,
+        message: t('connectionFailed', 'Connection failed: ') + errorMessage
+      });
     } finally {
       setIsTesting(false);
     }
@@ -451,10 +458,45 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
     setIsSaving(true);
 
     try {
+      // Format the date properly for the backend
+      let formattedStartDate = formData.dataToSyncStartDate;
+      if (formattedStartDate && formData.syncDataEverSince) {
+        // Convert yyyy-MM-dd to ISO8601 format with time (yyyy-MM-dd'T'00:00:00.000+0000)
+        // The backend expects: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+        try {
+          const date = new Date(formattedStartDate);
+          // Set time to start of day in UTC
+          date.setUTCHours(0, 0, 0, 0);
+          formattedStartDate = date.toISOString();
+        } catch {
+          formattedStartDate = '';
+        }
+      }
+
+      // Map frontend field names to backend field names
+      // Backend uses: url, urlUserName, urlPassword (not serverUrl, username, password)
       const submissionData: any = {
-        ...formData,
+        name: formData.name,
         resourceTypes: formData.resourceTypes?.join(','),
         resourceSearchParameter: JSON.stringify(formData.resourceSearchParameter || {}),
+        profileEnabled: formData.profileEnabled,
+        patientIdentifierType: formData.patientIdentifierType,
+        numberOfResourcesInBundle: formData.numberOfResourcesInBundle,
+        durationToKeepSyncedResources: formData.durationToKeepSyncedResources,
+        generateBundle: formData.generateBundle,
+        isCaseBasedProfile: formData.isCaseBasedProfile,
+        caseBasedPrimaryResourceType: formData.caseBasedPrimaryResourceType,
+        caseBasedPrimaryResourceTypeId: formData.caseBasedPrimaryResourceTypeId,
+        syncLimit: formData.syncLimit,
+        url: formData.serverUrl,
+        urlUserName: formData.username,
+        urlPassword: formData.password,
+        urlToken: formData.urlToken,
+        syncDataEverSince: formData.syncDataEverSince,
+        // Only send dataToSyncStartDate if syncDataEverSince is true and date is valid
+        dataToSyncStartDate: formData.syncDataEverSince ? formattedStartDate : null,
+        searchable: formData.searchable,
+        searchURL: formData.searchURL,
       };
 
       if (profile?.uuid) {
@@ -478,12 +520,28 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
       }
       onSave();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      // Extract a meaningful error message for the user
+      let errorMessage = error?.message || t('unknownError', 'An unknown error occurred');
+
+      // Clean up common error prefixes to avoid redundant messages
+      errorMessage = errorMessage
+        .replace(/^Failed to (create|update) sync profile:\s*/i, '')
+        .replace(/^Error (creating|updating) sync profile:\s*/i, '')
+        .replace(/^Error saving profile:\s*/i, '');
+
+      // Create a user-friendly description
+      const description = profile?.uuid
+        ? t('errorUpdatingProfileDescription', 'Could not update the sync profile. Please check your input and try again.')
+        : t('errorCreatingProfileDescription', 'Could not create the sync profile. Please check your input and try again.');
+
       showNotification({
-        title: t('errorSavingProfile', 'Error saving profile'),
+        title: profile?.uuid
+          ? t('errorUpdatingProfile', 'Error updating profile')
+          : t('errorCreatingProfile', 'Error creating profile'),
         kind: 'error',
         critical: true,
-        description: error.message,
+        description: `${description} ${errorMessage}`,
       });
     } finally {
       setIsSaving(false);
@@ -676,24 +734,20 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
                       <SelectItem key={type.uuid} value={type.uuid} text={type.name} />
                     ))}
                   </Select>
-
-                  <TextInput
-                    id="identifier-source-id"
-                    labelText={t('patientIdentifierSourceId', 'Patient Identifier Source Id')}
-                    placeholder={t('egConceptUuidProgramAttributeType', 'e.g. concept UUID, program attribute type')}
-                    value={formData.identifierSourceId}
-                    onChange={(e) => handleChange('identifierSourceId', e.target.value)}
-                    className={styles.formField}
-                  />
                 </Tile>
 
                 <Tile className={styles.card}>
                   <h4 className={styles.cardHeader}>{t('resourceFilters', 'Resource Filters')}</h4>
+                  <p className={styles.cardDescription}>
+                    {t('resourceFiltersDescription', 'Select specific types and concepts to filter resources during synchronization.')}
+                  </p>
 
-                  {conceptsLoading ? (
-                    <div className={styles.formField}>Loading filters...</div>
-                  ) : (
-                    <>
+                  {/* Encounter Types Section */}
+                  <div className={styles.filterSection}>
+                    <h5 className={styles.filterSectionHeader}>{t('encounter', 'Encounter')}</h5>
+                    {conceptsLoading ? (
+                      <div className={styles.formField}>{t('loadingFilters', 'Loading filters...')}</div>
+                    ) : (
                       <EncounterTypeSearchMultiSelect
                         id="encounter-type-search"
                         labelText={t('encounterTypes', 'Encounter Types')}
@@ -702,65 +756,78 @@ const ProfileDetailModal: React.FC<ProfileDetailModalProps> = ({
                         value={encounterTypeDisplays}
                         onChange={handleEncounterTypesChange}
                       />
-                    </>
-                  )}
+                    )}
+                  </div>
 
-                  <ConceptSearchMultiSelect
-                    id="observation-code-concepts"
-                    labelText={t('observationConceptIds', 'Observation Concepts')}
-                    placeholder={t('searchObservationConcepts', 'Search for observation concepts...')}
-                    value={conceptDisplays.observationCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('observationCode', concepts)}
-                  />
+                  {/* EpisodeOfCare Programs Section */}
+                  <div className={styles.filterSection}>
+                    <h5 className={styles.filterSectionHeader}>{t('episodeOfCare', 'EpisodeOfCare (Programs)')}</h5>
+                    {conceptsLoading ? (
+                      <div className={styles.formField}>{t('loadingFilters', 'Loading filters...')}</div>
+                    ) : (
+                      <ProgramSearchMultiSelect
+                        id="program-search"
+                        labelText={t('episodeOfCarePrograms', 'Programs')}
+                        placeholder={t('searchPrograms', 'Search for programs...')}
+                        helperText={t('selectProgramsToFilter', 'Select programs to filter by')}
+                        value={programDisplays}
+                        onChange={handleProgramsChange}
+                      />
+                    )}
+                  </div>
 
-                  <ConceptSearchMultiSelect
-                    id="medication-request-code-concepts"
-                    labelText={t('medicationRequestConceptIds', 'Medication Request Concepts')}
-                    placeholder={t('searchMedicationRequestConcepts', 'Search for medication request concepts...')}
-                    value={conceptDisplays.medicationRequestCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('medicationRequestCode', concepts)}
-                  />
+                  {/* Clinical Concepts Section */}
+                  <div className={styles.filterSection}>
+                    <h5 className={styles.filterSectionHeader}>{t('clinicalConcepts', 'Clinical Concepts')}</h5>
 
-                  <ConceptSearchMultiSelect
-                    id="medication-dispense-code-concepts"
-                    labelText={t('medicationDispenseConceptIds', 'Medication Dispense Concepts')}
-                    placeholder={t('searchMedicationDispenseConcepts', 'Search for medication dispense concepts...')}
-                    value={conceptDisplays.medicationDispenseCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('medicationDispenseCode', concepts)}
-                  />
+                    <ConceptSearchMultiSelect
+                      id="observation-code-concepts"
+                      labelText={t('observationConceptIds', 'Observation Concepts')}
+                      placeholder={t('searchObservationConcepts', 'Search for observation concepts...')}
+                      value={conceptDisplays.observationCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('observationCode', concepts)}
+                    />
 
-                  <ConceptSearchMultiSelect
-                    id="condition-code-concepts"
-                    labelText={t('conditionConceptIds', 'Condition Concepts')}
-                    placeholder={t('searchConditionConcepts', 'Search for condition concepts...')}
-                    value={conceptDisplays.conditionCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('conditionCode', concepts)}
-                  />
+                    <ConceptSearchMultiSelect
+                      id="medication-request-code-concepts"
+                      labelText={t('medicationRequestConceptIds', 'Medication Request Concepts')}
+                      placeholder={t('searchMedicationRequestConcepts', 'Search for medication request concepts...')}
+                      value={conceptDisplays.medicationRequestCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('medicationRequestCode', concepts)}
+                    />
 
-                  <ConceptSearchMultiSelect
-                    id="diagnostic-report-code-concepts"
-                    labelText={t('diagnosticReportConceptIds', 'Diagnostic Report Concepts')}
-                    placeholder={t('searchDiagnosticReportConcepts', 'Search for diagnostic report concepts...')}
-                    value={conceptDisplays.diagnosticReportCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('diagnosticReportCode', concepts)}
-                  />
+                    <ConceptSearchMultiSelect
+                      id="medication-dispense-code-concepts"
+                      labelText={t('medicationDispenseConceptIds', 'Medication Dispense Concepts')}
+                      placeholder={t('searchMedicationDispenseConcepts', 'Search for medication dispense concepts...')}
+                      value={conceptDisplays.medicationDispenseCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('medicationDispenseCode', concepts)}
+                    />
 
-                  <ConceptSearchMultiSelect
-                    id="service-request-code-concepts"
-                    labelText={t('serviceRequestConceptIds', 'Service Request Concepts')}
-                    placeholder={t('searchServiceRequestConcepts', 'Search for service request concepts...')}
-                    value={conceptDisplays.serviceRequestCode ?? []}
-                    onChange={(concepts) => handleConceptsChange('serviceRequestCode', concepts)}
-                  />
+                    <ConceptSearchMultiSelect
+                      id="condition-code-concepts"
+                      labelText={t('conditionConceptIds', 'Condition Concepts')}
+                      placeholder={t('searchConditionConcepts', 'Search for condition concepts...')}
+                      value={conceptDisplays.conditionCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('conditionCode', concepts)}
+                    />
 
-                  <ProgramSearchMultiSelect
-                    id="program-search"
-                    labelText={t('episodeOfCarePrograms', 'EpisodeOfCare (Programs)')}
-                    placeholder={t('searchPrograms', 'Search for programs...')}
-                    helperText={t('selectProgramsToFilter', 'Select programs to filter by')}
-                    value={programDisplays}
-                    onChange={handleProgramsChange}
-                  />
+                    <ConceptSearchMultiSelect
+                      id="diagnostic-report-code-concepts"
+                      labelText={t('diagnosticReportConceptIds', 'Diagnostic Report Concepts')}
+                      placeholder={t('searchDiagnosticReportConcepts', 'Search for diagnostic report concepts...')}
+                      value={conceptDisplays.diagnosticReportCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('diagnosticReportCode', concepts)}
+                    />
+
+                    <ConceptSearchMultiSelect
+                      id="service-request-code-concepts"
+                      labelText={t('serviceRequestConceptIds', 'Service Request Concepts')}
+                      placeholder={t('searchServiceRequestConcepts', 'Search for service request concepts...')}
+                      value={conceptDisplays.serviceRequestCode ?? []}
+                      onChange={(concepts) => handleConceptsChange('serviceRequestCode', concepts)}
+                    />
+                  </div>
                 </Tile>
               </div>
             </TabPanel>

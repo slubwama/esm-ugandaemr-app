@@ -236,7 +236,6 @@ export interface SyncFhirProfile {
   caseBasedPrimaryResourceType?: string;
   caseBasedPrimaryResourceTypeId?: string;
   patientIdentifierType?: string;
-  identifierSourceId?: string;
   resourceSearchParameter?: ResourceSearchParameter;
   syncLimit?: number;
   searchable?: boolean;
@@ -263,7 +262,6 @@ export interface SyncProfileFormData {
   caseBasedPrimaryResourceType?: string;
   caseBasedPrimaryResourceTypeId?: string;
   patientIdentifierType?: string;
-  identifierSourceId?: string;
   resourceSearchParameter?: ResourceSearchParameter;
   syncLimit?: number;
   searchable?: boolean;
