@@ -1,29 +1,21 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  DataTable,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableContainer,
   Button,
   Select,
   SelectItem,
   InlineLoading,
   Tag,
 } from '@carbon/react';
-import { TrashCan, Renew } from '@carbon/react/icons';
+import { TrashCan, Renew, Group } from '@carbon/react/icons';
 import { showNotification, showSnackbar, openmrsFetch } from '@openmrs/esm-framework';
 import {
   useCohortTypes,
-  useCohortsWithMembers,
   removePatientFromCohort,
   getPatientData,
 } from './cohort-management.resources';
-import { type CohortWithMembers, type CohortType, type Patient } from './cohort-management.types';
+import { type CohortType, type Patient } from './cohort-management.types';
+import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './cohort-management.scss';
 
 interface PatientMember {
@@ -36,11 +28,6 @@ interface PatientMember {
 const PatientExit: React.FC = () => {
   const { t } = useTranslation();
   const { cohortTypes, isLoading: typesLoading, isError: typesError } = useCohortTypes();
-  const {
-    cohortsWithMembers,
-    isLoading: membersLoading,
-    isError: membersError,
-  } = useCohortsWithMembers('');
 
   const [selectedCohortType, setSelectedCohortType] = useState('');
   const [patients, setPatients] = useState<Array<PatientMember>>([]);
@@ -153,44 +140,63 @@ const PatientExit: React.FC = () => {
     [t, selectedCohortType, loadPatientsForCohortType]
   );
 
-  const tableHeaders = useMemo(
-    () => [
-      { key: 'name', header: t('name', 'Name') },
-      { key: 'age', header: t('age', 'Age') },
-      { key: 'birthdate', header: t('birthdate', 'Birthdate') },
-      { key: 'gender', header: t('gender', 'Gender') },
-      { key: 'group', header: t('group', 'Group') },
-      { key: 'dateEnrolled', header: t('dateEnrolled', 'Date Enrolled on Program') },
-      { key: 'actions', header: t('actions', 'Actions') },
-    ],
-    [t]
-  );
+  const columns = [
+    { key: 'name', header: t('name', 'Name') },
+    { key: 'age', header: t('age', 'Age') },
+    { key: 'birthdate', header: t('birthdate', 'Birthdate') },
+    { key: 'gender', header: t('gender', 'Gender') },
+    { key: 'group', header: t('group', 'Group') },
+    { key: 'dateEnrolled', header: t('dateEnrolled', 'Date Enrolled on Program') },
+    { key: 'actions', header: t('actions', 'Actions') },
+  ];
 
-  const tableRows = useMemo(
-    () =>
-      patients.map((patientMember) => {
-        const birthdate = new Date(patientMember.patient.birthdate).toLocaleDateString();
-        return {
-          id: patientMember.uuid,
-          name: patientMember.patient.display,
-          age: patientMember.patient.age,
-          birthdate: birthdate,
-          gender: patientMember.patient.gender,
-          group: patientMember.cohortName,
-          dateEnrolled: patientMember.startDate,
-          actions: (
-            <Button
-              kind="ghost"
-              renderIcon={TrashCan}
-              iconDescription={t('remove', 'Remove')}
-              onClick={() => handleRemovePatient(patientMember.uuid)}
-              hasIconOnly
-            />
-          ),
-        };
-      }),
-    [patients, t, handleRemovePatient]
-  );
+  const renderCell = (columnKey: string, row: PatientMember) => {
+    switch (columnKey) {
+      case 'name':
+        return row.patient.display;
+      case 'age':
+        return row.patient.age;
+      case 'birthdate':
+        return new Date(row.patient.birthdate).toLocaleDateString();
+      case 'gender':
+        return row.patient.gender;
+      case 'group':
+        return row.cohortName;
+      case 'dateEnrolled':
+        return row.startDate;
+      case 'actions':
+        return (
+          <Button
+            kind="ghost"
+            renderIcon={TrashCan}
+            iconDescription={t('remove', 'Remove')}
+            onClick={() => handleRemovePatient(row.uuid)}
+            hasIconOnly
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (typesLoading) {
+    return (
+      <div className={styles.patientExitContent}>
+        <InlineLoading description={t('loading', 'Loading...')} />
+      </div>
+    );
+  }
+
+  if (typesError) {
+    return (
+      <div className={styles.patientExitContent}>
+        <div className={styles.errorState}>
+          <h3>{t('errorLoadingData', 'Error Loading Data')}</h3>
+          <p>{typesError.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.patientExitContent}>
@@ -212,13 +218,13 @@ const PatientExit: React.FC = () => {
           </Select>
 
           <Button
-            kind="tertiary"
+            kind="ghost"
             renderIcon={Renew}
             onClick={handleRefresh}
             disabled={isLoadingPatients}
-          >
-            {t('refresh', 'Refresh')}
-          </Button>
+            hasIconOnly
+            iconDescription={t('refresh', 'Refresh')}
+          />
 
           {isLoadingPatients && (
             <div className={styles.loadingSection}>
@@ -228,40 +234,18 @@ const PatientExit: React.FC = () => {
         </div>
       </div>
 
-      {patients.length > 0 ? (
-        <DataTable rows={tableRows} headers={tableHeaders}>
-          {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-            <TableContainer>
-              <Table {...getTableProps()}>
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableHeader key={header.key} {...getHeaderProps({ header })}>
-                        {header.header}
-                      </TableHeader>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.id} {...getRowProps({ row })}>
-                      {row.cells.map((cell) => (
-                        <TableCell key={cell.id}>{cell.value}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DataTable>
-      ) : (
-        !isLoadingPatients && (
-          <div className={styles.emptyState}>
-            <p>{t('noPatientsFound', 'No patients found for this group type')}</p>
-          </div>
-        )
-      )}
+      <SystemAdminDataTable
+        columns={columns}
+        data={patients}
+        isLoading={isLoadingPatients}
+        searchPlaceholder={t('searchPatients', 'Search patients...')}
+        emptyState={{
+          title: t('noPatientsFound', 'No Patients Found'),
+          description: t('noPatientsDesc', 'Select a group type to view enrolled patients'),
+          icon: <Group size={48} />,
+        }}
+        renderCell={renderCell}
+      />
     </div>
   );
 };

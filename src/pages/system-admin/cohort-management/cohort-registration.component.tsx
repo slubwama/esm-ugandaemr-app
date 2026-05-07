@@ -1,14 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  DataTable,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableContainer,
   Button,
   TextInput,
   Select,
@@ -17,8 +9,8 @@ import {
   FormGroup,
   InlineLoading,
 } from '@carbon/react';
-import { Add, Edit, TrashCan, Search, Renew } from '@carbon/react/icons';
-import { showNotification, showSnackbar, openmrsFetch } from '@openmrs/esm-framework';
+import { Add, Edit, TrashCan, Renew } from '@carbon/react/icons';
+import { showNotification, showSnackbar } from '@openmrs/esm-framework';
 import {
   useCohortTypes,
   createCohort,
@@ -26,7 +18,8 @@ import {
   deleteCohort,
   getCohortForEdit,
 } from './cohort-management.resources';
-import { type Cohort, type CohortFormData, type CohortType } from './cohort-management.types';
+import { type Cohort, type CohortFormData } from './cohort-management.types';
+import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './cohort-management.scss';
 
 // Specific cohort type UUIDs from the GSP
@@ -43,6 +36,7 @@ const CohortRegistration: React.FC = () => {
 
   // Fetch cohorts for all types manually on mount and refresh
   const fetchAllCohorts = useCallback(async () => {
+    const { openmrsFetch } = await import('@openmrs/esm-framework');
     const allCohorts: Array<Cohort> = [];
     for (const uuid of COHORT_TYPE_UUIDS) {
       const response = await openmrsFetch(
@@ -89,7 +83,6 @@ const CohortRegistration: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCohort, setEditingCohort] = useState<Cohort | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const [formData, setFormData] = useState<CohortFormData>({
     name: '',
@@ -105,16 +98,8 @@ const CohortRegistration: React.FC = () => {
     cohortType: '',
   });
 
-  const filteredCohorts = useMemo(() => {
-    if (!searchQuery) return cohorts;
-    const query = searchQuery.toLowerCase();
-    return cohorts.filter(
-      (cohort) =>
-        cohort.name?.toLowerCase().includes(query) ||
-        cohort.description?.toLowerCase().includes(query) ||
-        cohort.cohortType?.name?.toLowerCase().includes(query)
-    );
-  }, [cohorts, searchQuery]);
+  // Filter out voided cohorts
+  const activeCohorts = cohorts.filter((c) => !c.voided);
 
   const handleOpenModal = useCallback(() => {
     setEditingCohort(null);
@@ -268,56 +253,57 @@ const CohortRegistration: React.FC = () => {
     [formData, editingCohort, validateForm, loadCohorts, t]
   );
 
-  const tableHeaders = useMemo(
-    () => [
-      { key: 'name', header: t('name', 'Name') },
-      { key: 'description', header: t('description', 'Description') },
-      { key: 'cohortType', header: t('groupType', 'Group Type') },
-      { key: 'createdOn', header: t('createdOn', 'Created On') },
-      { key: 'identifier', header: t('identifier', 'Identifier') },
-      { key: 'actions', header: t('actions', 'Actions') },
-    ],
-    [t]
-  );
+  const columns = [
+    { key: 'name', header: t('name', 'Name') },
+    { key: 'description', header: t('description', 'Description') },
+    { key: 'cohortType', header: t('groupType', 'Group Type') },
+    { key: 'createdOn', header: t('createdOn', 'Created On') },
+    { key: 'identifier', header: t('identifier', 'Identifier') },
+    { key: 'actions', header: t('actions', 'Actions') },
+  ];
 
-  const tableRows = useMemo(
-    () =>
-      filteredCohorts
-        .filter((cohort) => !cohort.voided)
-        .map((cohort) => {
-          const createdDate = new Date(cohort.startDate);
-          return {
-            id: cohort.uuid,
-            name: cohort.name || '-',
-            description: cohort.description || '-',
-            cohortType: cohort.cohortType?.name || '-',
-            createdOn: `${createdDate.getFullYear()}-${createdDate.getMonth() + 1}-${createdDate.getDate()}`,
-            identifier: cohort.uuid,
-            actions: (
-              <div className={styles.actionButtons}>
-                <Button
-                  kind="ghost"
-                  renderIcon={Edit}
-                  iconDescription={t('edit', 'Edit')}
-                  onClick={() => handleEditCohort(cohort)}
-                  hasIconOnly
-                />
-                <Button
-                  kind="ghost"
-                  renderIcon={TrashCan}
-                  iconDescription={t('delete', 'Delete')}
-                  onClick={() => handleDeleteCohort(cohort)}
-                  hasIconOnly
-                />
-              </div>
-            ),
-          };
-        }),
-    [filteredCohorts, t, handleEditCohort, handleDeleteCohort]
-  );
+  const renderCell = (columnKey: string, row: Cohort) => {
+    switch (columnKey) {
+      case 'description':
+        return row.description || '-';
+      case 'cohortType':
+        return row.cohortType?.name || '-';
+      case 'createdOn': {
+        const createdDate = new Date(row.startDate);
+        return `${createdDate.getFullYear()}-${createdDate.getMonth() + 1}-${createdDate.getDate()}`;
+      }
+      case 'identifier':
+        return row.uuid;
+      case 'actions':
+        return (
+          <div className={styles.actionButtons}>
+            <Button
+              kind="ghost"
+              renderIcon={Edit}
+              iconDescription={t('edit', 'Edit')}
+              onClick={() => handleEditCohort(row)}
+              hasIconOnly
+            />
+            <Button
+              kind="ghost"
+              renderIcon={TrashCan}
+              iconDescription={t('delete', 'Delete')}
+              onClick={() => handleDeleteCohort(row)}
+              hasIconOnly
+            />
+          </div>
+        );
+      default:
+        return row[columnKey];
+    }
+  };
 
   if (typesLoading || isLoadingCohorts) {
-    return <InlineLoading description={t('loading', 'Loading...')} />;
+    return (
+      <div className={styles.cohortRegistrationContent}>
+        <InlineLoading description={t('loading', 'Loading...')} />
+      </div>
+    );
   }
 
   if (typesError || cohortsError) {
@@ -339,49 +325,18 @@ const CohortRegistration: React.FC = () => {
       <div className={styles.headerSection}>
         <h2 className={styles.pageTitle}>{t('dsdRefillGroups', 'DSD Refill Groups')}</h2>
         <div className={styles.headerActions}>
-          <TextInput
-            id="cohort-search"
-            labelText=""
-            placeholder={t('searchCohorts', 'Search cohorts...')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-          <Button kind="tertiary" renderIcon={Renew} onClick={handleRefresh} disabled={isLoadingCohorts}>
-            {t('refresh', 'Refresh')}
-          </Button>
           <Button kind="primary" renderIcon={Add} onClick={handleOpenModal}>
             {t('create', 'Create')}
           </Button>
         </div>
       </div>
 
-      <DataTable rows={tableRows} headers={tableHeaders}>
-        {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-          <TableContainer>
-            <Table {...getTableProps()}>
-              <TableHead>
-                <TableRow>
-                  {headers.map((header) => (
-                    <TableHeader key={header.key} {...getHeaderProps({ header })}>
-                      {header.header}
-                    </TableHeader>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id} {...getRowProps({ row })}>
-                    {row.cells.map((cell) => (
-                      <TableCell key={cell.id}>{cell.value}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </DataTable>
+      <SystemAdminDataTable
+        columns={columns}
+        data={activeCohorts}
+        searchPlaceholder={t('searchCohorts', 'Search cohorts...')}
+        renderCell={renderCell}
+      />
 
       <Modal
         open={isModalOpen}

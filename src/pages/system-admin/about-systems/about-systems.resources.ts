@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { type systemInfo } from './about-systems.types';
+import { type SystemInfo, type ModulesResponse, type Module } from './types';
 import { NHFRIdentifier } from '../../../constants';
 
 type facilityRequest = {
@@ -65,7 +65,7 @@ export async function updatePropertyValue(propertyName: string, value: string) {
 
 export function useGetSystemInformation() {
   const apiUrl = `/ws/rest/v1/systeminformation?v=full`;
-  const { data, error, isLoading } = useSWR<{ data: systemInfo }, Error>(apiUrl, openmrsFetch);
+  const { data, error, isLoading } = useSWR<{ data: SystemInfo }, Error>(apiUrl, openmrsFetch);
 
   return {
     systemInfo: data?.data,
@@ -81,6 +81,34 @@ export function useRetrieveFacilityCode() {
 
   return {
     facilityIds: data?.data['results'],
+    isLoading,
+    isError: error,
+  };
+}
+
+export function useGetModules() {
+  const apiUrl = `/ws/rest/v1/module?v=full`;
+  const { data, error, isLoading } = useSWR<ModulesResponse, Error>(
+    apiUrl,
+    () => openmrsFetch(apiUrl).then(res => res.json())
+  );
+
+  return {
+    modules: data?.results || [],
+    isLoading,
+    isError: error,
+  };
+}
+
+export function useGetModule(uuid: string) {
+  const apiUrl = uuid ? `/ws/rest/v1/module/${uuid}?v=full` : null;
+  const { data, error, isLoading } = useSWR<Module, Error>(
+    apiUrl,
+    apiUrl ? () => openmrsFetch(apiUrl).then(res => res.json()) : null
+  );
+
+  return {
+    module: data,
     isLoading,
     isError: error,
   };

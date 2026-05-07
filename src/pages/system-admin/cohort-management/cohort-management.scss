@@ -79,6 +79,24 @@
   margin-right: 0.5rem;
 }
 
+.cohortsTable {
+  margin-top: 1rem;
+  width: 100%;
+
+  thead {
+    display: table-header-group;
+
+    th {
+      background-color: #f4f4f4;
+      color: #161616;
+      text-align: left;
+      padding: 0.75rem;
+      font-weight: 600;
+      border-bottom: 2px solid #e0e0e0;
+    }
+  }
+}
+
 // Responsive adjustments
 @media (max-width: 768px) {
   .headerSection {

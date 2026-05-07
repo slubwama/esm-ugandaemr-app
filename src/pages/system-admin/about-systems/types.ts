@@ -40,3 +40,33 @@ export interface Link {
   uri: string;
   resourceAlias: string;
 }
+
+export interface Module {
+  uuid: string;
+  name: string;
+  moduleId: string;
+  description?: string;
+  version: string;
+  started: boolean;
+  startupErrorMessage?: string;
+  requireOpenmrsVersion?: string;
+  awareOfModules?: string[];
+  links?: ModuleLink[];
+}
+
+export interface ModuleLink {
+  rel: string;
+  uri: string;
+  resourceAlias: string;
+}
+
+export interface ModulesResponse {
+  results?: Module[];
+}
+
+export interface SystemInfo {
+  systemInfo: {
+    'SystemInfo.title.moduleInformation': Record<string, string>;
+    'SystemInfo.title.openmrsInformation': Record<string, string>;
+  };
+}

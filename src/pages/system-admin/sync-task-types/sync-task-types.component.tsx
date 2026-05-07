@@ -1,81 +1,24 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DataTable,
-  DataTableSkeleton,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableToolbar,
-  TableToolbarContent,
-  TableToolbarSearch,
-  Button,
-  OverflowMenuItem,
-  Toggle,
-  Pagination,
-} from '@carbon/react';
-import {
-  Add,
-  Export,
-  Play,
-  Settings,
-  Checkmark,
-  Warning,
-  Time,
-} from '@carbon/react/icons';
-import {
-  ErrorState,
-  UserHasAccess,
-  showNotification,
-  showSnackbar,
-  usePagination,
-} from '@openmrs/esm-framework';
+import { OverflowMenuItem } from '@carbon/react';
+import { Add, Export, Settings } from '@carbon/react/icons';
+import { ErrorState, UserHasAccess, showNotification, showSnackbar } from '@openmrs/esm-framework';
 import {
   useSyncTaskTypes,
   deleteSyncTaskType,
-  toggleTaskTypeStatus,
-  executeTaskType,
+  runTaskByName,
   exportTaskTypes,
 } from './sync-task-types.resources';
 import { type SyncTaskType } from './sync-task-types.types';
 import TaskTypeDetailModal from './tasktype-detail-modal.component';
+import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './sync-task-types.scss';
 
-interface SyncTaskTypesContentProps {
-  // Add any props if needed
-}
-
-const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
+const SyncTaskTypesContent: React.FC = () => {
   const { t } = useTranslation();
   const { taskTypes, isLoading, isError, mutate } = useSyncTaskTypes();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskType, setSelectedTaskType] = useState<SyncTaskType | undefined>();
-
-  const filteredTaskTypes = useMemo(() => {
-    if (!searchQuery) return taskTypes;
-    const query = searchQuery.toLowerCase();
-    return taskTypes.filter(
-      (taskType) =>
-        taskType.name?.toLowerCase().includes(query) ||
-        taskType.description?.toLowerCase().includes(query) ||
-        taskType.taskType?.toLowerCase().includes(query)
-    );
-  }, [taskTypes, searchQuery]);
-
-  // Pagination setup
-  const pageSizes = [10, 20, 30, 40, 50];
-  const [currentPageSize, setPageSize] = useState(10);
-
-  const {
-    goTo,
-    results: paginatedTaskTypes,
-    currentPage,
-  } = usePagination(filteredTaskTypes, currentPageSize);
 
   const handleCreateTaskType = useCallback(() => {
     setSelectedTaskType(undefined);
@@ -111,36 +54,10 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
     [t, mutate]
   );
 
-  const handleToggleStatus = useCallback(
-    async (taskType: SyncTaskType, enabled: boolean) => {
-      try {
-        await toggleTaskTypeStatus(taskType.uuid, enabled);
-        showSnackbar({
-          isLowContrast: true,
-          kind: 'success',
-          title: t('statusUpdated', 'Status updated'),
-          subtitle: enabled
-            ? t('taskTypeEnabled', 'Task type enabled successfully')
-            : t('taskTypeDisabled', 'Task type disabled successfully'),
-          autoClose: true,
-        });
-        mutate();
-      } catch (error) {
-        showNotification({
-          title: t('errorUpdatingStatus', 'Error updating status'),
-          kind: 'error',
-          critical: true,
-          description: error.message,
-        });
-      }
-    },
-    [t, mutate]
-  );
-
   const handleExecuteTask = useCallback(
     async (taskType: SyncTaskType) => {
       try {
-        await executeTaskType(taskType.uuid);
+        await runTaskByName(taskType.name);
         showSnackbar({
           isLowContrast: true,
           kind: 'success',
@@ -181,182 +98,104 @@ const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = () => {
     }
   }, [t]);
 
-  const getStatusIcon = (status?: string) => {
-    switch (status) {
-      case 'success':
-        return <Checkmark size={16} className={styles.statusSuccess} />;
-      case 'failed':
-        return <Warning size={16} className={styles.statusFailed} />;
-      case 'running':
-        return <Play size={16} className={styles.statusRunning} />;
-      default:
-        return <Time size={16} className={styles.statusPending} />;
-    }
-  };
+  const columns = [
+    { key: 'name', header: t('taskName', 'Task Name') },
+    { key: 'dataType', header: t('dataType', 'Data Type') },
+    { key: 'url', header: t('url', 'URL') },
+    { key: 'tokenType', header: t('tokenType', 'Token Type') },
+    { key: 'actions', header: t('actions', 'Actions') },
+  ];
 
-  const tableHeaders = useMemo(
-    () => [
-      { key: 'name', header: t('taskName', 'Task Name') },
-      { key: 'taskType', header: t('taskType', 'Task Type') },
-      { key: 'executionOrder', header: t('executionOrder', 'Order') },
-      { key: 'lastExecutionDate', header: t('lastExecution', 'Last Execution') },
-      { key: 'lastExecutionStatus', header: t('status', 'Status') },
-      { key: 'taskEnabled', header: t('enabled', 'Enabled') },
-      { key: 'actions', header: t('actions', 'Actions') },
-    ],
-    [t]
-  );
-
-  const tableRows = useMemo(
-    () =>
-      paginatedTaskTypes.map((taskType) => ({
-        id: taskType.uuid,
-        name: taskType.name || '-',
-        taskType: taskType.taskType || '-',
-        executionOrder: taskType.executionOrder ?? 0,
-        lastExecutionDate: taskType.lastExecutionDate
-          ? new Date(taskType.lastExecutionDate).toLocaleString()
-          : t('never', 'Never'),
-        lastExecutionStatus: (
-          <div className={`${styles.statusIndicator} ${styles['status_' + taskType.lastExecutionStatus]}`}>
-            {getStatusIcon(taskType.lastExecutionStatus)}
-            <span>{t(taskType.lastExecutionStatus || 'unknown', taskType.lastExecutionStatus || 'Unknown')}</span>
-          </div>
-        ),
-        taskEnabled: (
-          <Toggle
-            id={`toggle-${taskType.uuid}`}
-            toggled={taskType.taskEnabled}
-            onToggle={(checked) => handleToggleStatus(taskType, checked)}
-            size="sm"
-            labelA={t('off', 'Off')}
-            labelB={t('on', 'On')}
-          />
-        ),
-        actions: (
+  const renderCell = (columnKey: string, row: SyncTaskType) => {
+    switch (columnKey) {
+      case 'dataType':
+        return row.dataType || '-';
+      case 'url':
+        return row.url ? (
+          <span className={styles.truncatedText} title={row.url}>
+            {row.url.length > 40 ? `${row.url.substring(0, 40)}...` : row.url}
+          </span>
+        ) : '-';
+      case 'tokenType':
+        return row.tokenType || '-';
+      case 'actions':
+        return (
           <div className={styles.taskActions}>
             <OverflowMenuItem
               itemText={t('execute', 'Execute')}
-              onClick={() => handleExecuteTask(taskType)}
+              onClick={() => handleExecuteTask(row)}
             />
             <OverflowMenuItem
               itemText={t('edit', 'Edit')}
-              onClick={() => handleEditTaskType(taskType)}
+              onClick={() => handleEditTaskType(row)}
             />
             <OverflowMenuItem
               itemText={t('delete', 'Delete')}
               isDelete
-              onClick={() => handleDeleteTaskType(taskType)}
+              onClick={() => handleDeleteTaskType(row)}
             />
           </div>
-        ),
-      })),
-    [paginatedTaskTypes, t, handleToggleStatus, handleExecuteTask, handleEditTaskType, handleDeleteTaskType]
-  );
+        );
+      default:
+        return row[columnKey];
+    }
+  };
 
-  if (isLoading) {
-    return <DataTableSkeleton className={styles.taskTypesTable} />;
-  }
+  const toolbarActions: Array<{
+    label: string;
+    onClick: () => Promise<void>;
+    icon: typeof Export;
+    hasIconOnly: true;
+    iconDescription: string;
+    kind: 'ghost';
+    disabled: boolean;
+  }> = [
+    {
+      label: t('export', 'Export'),
+      onClick: handleExportTaskTypes,
+      icon: Export,
+      hasIconOnly: true,
+      iconDescription: t('export', 'Export'),
+      kind: 'ghost',
+      disabled: taskTypes.length === 0,
+    },
+  ];
 
-  if (isError) {
-    return (
-      <ErrorState
-        headerTitle={t('errorLoadingTaskTypes', 'Error loading sync task types')}
-        error={new Error(t('failedToLoadTaskTypes', 'Failed to load sync task types'))}
-      />
-    );
-  }
+  const createButton: {
+    label: string;
+    onClick: () => void;
+    icon: typeof Add;
+    hasIconOnly: true;
+    iconDescription: string;
+    kind: 'primary';
+  } = {
+    label: t('addTaskType', 'Add Task Type'),
+    onClick: handleCreateTaskType,
+    icon: Add,
+    hasIconOnly: true,
+    iconDescription: t('addTaskType', 'Add Task Type'),
+    kind: 'primary',
+  };
 
   return (
     <div className={styles.syncTaskTypesContent}>
-      {taskTypes.length === 0 ? (
-        <div className={styles.emptyState}>
-          <Settings size={48} className={styles.emptyStateIcon} />
-          <h3 className={styles.emptyStateTitle}>{t('noSyncTaskTypes', 'No Sync Task Types')}</h3>
-          <p className={styles.emptyStateDescription}>
-            {t('noSyncTaskTypesDesc', 'Create your first sync task type to get started')}
-          </p>
-          <UserHasAccess privilege="Manage Sync Task Types">
-            <Button kind="primary" onClick={handleCreateTaskType} renderIcon={Add}>
-              {t('createFirstTaskType', 'Create First Task Type')}
-            </Button>
-          </UserHasAccess>
-        </div>
-      ) : (
-        <DataTable rows={tableRows} headers={tableHeaders}>
-          {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-            <TableContainer className={styles.taskTypesTable}>
-              <TableToolbar>
-                <TableToolbarContent>
-                  <TableToolbarSearch
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event ? event.toString() : '')}
-                    placeholder={t('searchTaskTypes', 'Search task types...')}
-                  />
-                  <UserHasAccess privilege="Manage Sync Task Types">
-                    <Button
-                      kind="secondary"
-                      onClick={handleExportTaskTypes}
-                      renderIcon={Export}
-                      disabled={taskTypes.length === 0}
-                      hasIconOnly
-                      iconDescription={t('export', 'Export')}
-                      tooltipAlignment="end"
-                    >
-                      {t('export', 'Export')}
-                    </Button>
-                    <Button
-                      kind="primary"
-                      onClick={handleCreateTaskType}
-                      renderIcon={Add}
-                      hasIconOnly
-                      iconDescription={t('addTaskType', 'Add Task Type')}
-                      tooltipAlignment="end"
-                    >
-                      {t('addTaskType', 'Add Task Type')}
-                    </Button>
-                  </UserHasAccess>
-                </TableToolbarContent>
-              </TableToolbar>
-              <Table {...getTableProps()}>
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableHeader {...getHeaderProps({ header })}>{header.header}</TableHeader>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow {...getRowProps({ row })}>
-                      {row.cells.map((cell) => (
-                        <TableCell key={cell.id}>{cell.value}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Pagination
-                forwardText="Next page"
-                backwardText="Previous page"
-                page={currentPage}
-                pageSize={currentPageSize}
-                pageSizes={pageSizes}
-                totalItems={filteredTaskTypes.length}
-                className={styles.pagination}
-                onChange={({ pageSize, page }) => {
-                  if (pageSize !== currentPageSize) {
-                    setPageSize(pageSize);
-                  }
-                  if (page !== currentPage) {
-                    goTo(page);
-                  }
-                }}
-              />
-            </TableContainer>
-          )}
-        </DataTable>
-      )}
+      <SystemAdminDataTable
+        columns={columns}
+        data={taskTypes}
+        isLoading={isLoading}
+        error={isError ? t('errorLoadingTaskTypes', 'Error loading sync task types') : null}
+        searchPlaceholder={t('searchTaskTypes', 'Search task types...')}
+        emptyState={{
+          title: t('noSyncTaskTypes', 'No Sync Task Types'),
+          description: t('noSyncTaskTypesDesc', 'Create your first sync task type to get started'),
+          icon: <Settings size={48} />,
+        }}
+        toolbarActions={[
+          ...toolbarActions,
+          ...(taskTypes.length > 0 ? [createButton] : []),
+        ]}
+        renderCell={renderCell}
+      />
 
       <TaskTypeDetailModal
         open={isModalOpen}

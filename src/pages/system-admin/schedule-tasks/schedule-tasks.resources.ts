@@ -100,17 +100,21 @@ export async function toggleTaskStatus(uuid: string, enabled: boolean) {
   return updateScheduledTask(uuid, { enabled });
 }
 
-export async function runTaskNow(uuid: string) {
-  const abortController = new AbortController();
-
+export async function runTaskNow(taskName: string) {
   try {
-    const response = await openmrsFetch(`/ws/rest/v1/taskdefinition/${uuid}/run`, {
+    const response = await openmrsFetch('/ws/rest/v1/taskaction', {
       method: 'POST',
-      signal: abortController.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        action: 'runtask',
+        tasks: [taskName],
+      },
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to run task: ${response.statusText}`);
+    if (response.status !== 201) {
+      throw new Error(`Task execution failed with status ${response.status}`);
     }
 
     return response.data;

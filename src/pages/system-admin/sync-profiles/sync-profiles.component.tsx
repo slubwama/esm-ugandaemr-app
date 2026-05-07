@@ -1,39 +1,8 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DataTable,
-  DataTableSkeleton,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableToolbar,
-  TableToolbarContent,
-  TableToolbarSearch,
-  Button,
-  OverflowMenuItem,
-  Toggle,
-  Pagination,
-} from '@carbon/react';
-import {
-  Add,
-  Export,
-  Renew,
-  Connect,
-  Checkmark,
-  Warning,
-  Time,
-} from '@carbon/react/icons';
-import {
-  ErrorState,
-  UserHasAccess,
-  showNotification,
-  showSnackbar,
-  usePagination,
-} from '@openmrs/esm-framework';
+import { OverflowMenuItem, Toggle } from '@carbon/react';
+import { Add, Export, Connect } from '@carbon/react/icons';
+import { ErrorState, UserHasAccess, showNotification, showSnackbar } from '@openmrs/esm-framework';
 import {
   useSyncProfiles,
   deleteSyncProfile,
@@ -44,41 +13,15 @@ import {
 } from './sync-profiles.resources';
 import { type SyncFhirProfile } from './sync-profiles.types';
 import ProfileDetailModal from './profile-detail-modal.component';
+import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './sync-profiles.scss';
 
-interface SyncProfilesContentProps {
-  // Add any props if needed
-}
-
-const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
+const SyncProfilesContent: React.FC = () => {
   const { t } = useTranslation();
   const { profiles, isLoading, isError, mutate } = useSyncProfiles();
   const { patientIdentifierTypes } = usePatientIdentifierTypes();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<SyncFhirProfile | undefined>();
-  const [selectedProfiles, setSelectedProfiles] = useState<Set<string>>(new Set());
-
-  const filteredProfiles = useMemo(() => {
-    if (!searchQuery) return profiles;
-    const query = searchQuery.toLowerCase();
-    return profiles.filter(
-      (profile) =>
-        profile.name?.toLowerCase().includes(query) ||
-        profile.description?.toLowerCase().includes(query) ||
-        profile.serverUrl?.toLowerCase().includes(query)
-    );
-  }, [profiles, searchQuery]);
-
-  // Pagination setup
-  const pageSizes = [10, 20, 30, 40, 50];
-  const [currentPageSize, setPageSize] = useState(10);
-
-  const {
-    goTo,
-    results: paginatedProfiles,
-    currentPage,
-  } = usePagination(filteredProfiles, currentPageSize);
 
   const handleCreateProfile = useCallback(() => {
     setSelectedProfile(undefined);
@@ -187,199 +130,129 @@ const SyncProfilesContent: React.FC<SyncProfilesContentProps> = () => {
   const getStatusIcon = (status?: string) => {
     switch (status) {
       case 'success':
-        return <Checkmark size={16} className={styles.statusSuccess} />;
+        return <span className={styles.statusSuccess}>✓</span>;
       case 'failed':
-        return <Warning size={16} className={styles.statusFailed} />;
+        return <span className={styles.statusFailed}>⚠</span>;
       case 'in_progress':
-        return <Renew size={16} className={styles.statusInProgress} />;
+        return <span className={styles.statusInProgress}>↻</span>;
       default:
-        return <Time size={16} className={styles.statusPending} />;
+        return <span className={styles.statusPending}>·</span>;
     }
   };
 
-  const tableHeaders = useMemo(
-    () => [
-      {
-        key: 'name',
-        header: t('profileName', 'Profile Name'),
-      },
-      {
-        key: 'serverUrl',
-        header: t('serverUrl', 'Server URL'),
-      },
-      {
-        key: 'lastSyncDate',
-        header: t('lastSync', 'Last Sync'),
-      },
-      {
-        key: 'syncStatus',
-        header: t('status', 'Status'),
-      },
-      {
-        key: 'profileEnabled',
-        header: t('enabled', 'Enabled'),
-      },
-      {
-        key: 'actions',
-        header: t('actions', 'Actions'),
-      },
-    ],
-    [t]
-  );
+  const columns = [
+    { key: 'name', header: t('profileName', 'Profile Name') },
+    { key: 'serverUrl', header: t('serverUrl', 'Server URL') },
+    { key: 'lastSyncDate', header: t('lastSync', 'Last Sync') },
+    { key: 'syncStatus', header: t('status', 'Status') },
+    { key: 'profileEnabled', header: t('enabled', 'Enabled') },
+    { key: 'actions', header: t('actions', 'Actions') },
+  ];
 
-  const tableRows = useMemo(
-    () =>
-      paginatedProfiles.map((profile) => ({
-        id: profile.uuid,
-        name: profile.name || '-',
-        serverUrl: profile.serverUrl || '-',
-        lastSyncDate: profile.lastSyncDate
-          ? new Date(profile.lastSyncDate).toLocaleString()
-          : t('never', 'Never'),
-        syncStatus: (
-          <div className={`${styles.statusIndicator} ${styles['status_' + profile.syncStatus]}`}>
-            {getStatusIcon(profile.syncStatus)}
-            <span>{t(profile.syncStatus || 'unknown', profile.syncStatus || 'Unknown')}</span>
+  const renderCell = (columnKey: string, row: SyncFhirProfile) => {
+    switch (columnKey) {
+      case 'serverUrl':
+        return row.serverUrl || '-';
+      case 'lastSyncDate':
+        return row.lastSyncDate
+          ? new Date(row.lastSyncDate).toLocaleString()
+          : t('never', 'Never');
+      case 'syncStatus':
+        return (
+          <div className={`${styles.statusIndicator} ${styles['status_' + row.syncStatus]}`}>
+            {getStatusIcon(row.syncStatus)}
+            <span>{t(row.syncStatus || 'unknown', row.syncStatus || 'Unknown')}</span>
           </div>
-        ),
-        profileEnabled: (
+        );
+      case 'profileEnabled':
+        return (
           <Toggle
-            id={`toggle-${profile.uuid}`}
-            toggled={profile.profileEnabled}
-            onToggle={(checked) => handleToggleStatus(profile, checked)}
+            id={`toggle-${row.uuid}`}
+            toggled={row.profileEnabled}
+            onToggle={(checked) => handleToggleStatus(row, checked)}
             size="sm"
             labelA={t('off', 'Off')}
             labelB={t('on', 'On')}
           />
-        ),
-        actions: (
+        );
+      case 'actions':
+        return (
           <div className={styles.profileActions}>
             <OverflowMenuItem
               itemText={t('edit', 'Edit')}
-              onClick={() => handleEditProfile(profile)}
+              onClick={() => handleEditProfile(row)}
             />
             <OverflowMenuItem
               itemText={t('syncNow', 'Sync Now')}
-              onClick={() => handleTriggerSync(profile)}
+              onClick={() => handleTriggerSync(row)}
             />
             <OverflowMenuItem
               itemText={t('delete', 'Delete')}
               isDelete
-              onClick={() => handleDeleteProfile(profile)}
+              onClick={() => handleDeleteProfile(row)}
             />
           </div>
-        ),
-      })),
-    [paginatedProfiles, t, handleToggleStatus, handleEditProfile, handleTriggerSync, handleDeleteProfile]
-  );
+        );
+      default:
+        return row[columnKey];
+    }
+  };
 
-  if (isLoading) {
-    return <DataTableSkeleton className={styles.syncTable} />;
-  }
+  const toolbarActions: Array<{
+    label: string;
+    onClick: () => Promise<void>;
+    icon: typeof Export;
+    hasIconOnly: true;
+    iconDescription: string;
+    kind: 'ghost';
+    disabled: boolean;
+  }> = [
+    {
+      label: t('export', 'Export'),
+      onClick: handleExportProfiles,
+      icon: Export,
+      hasIconOnly: true,
+      iconDescription: t('export', 'Export'),
+      kind: 'ghost',
+      disabled: profiles.length === 0,
+    },
+  ];
 
-  if (isError) {
-    return (
-      <ErrorState
-        headerTitle={t('errorLoadingProfiles', 'Error loading sync profiles')}
-        error={new Error(t('failedToLoadProfiles', 'Failed to load sync profiles'))}
-      />
-    );
-  }
+  const createButton: {
+    label: string;
+    onClick: () => void;
+    icon: typeof Add;
+    hasIconOnly: true;
+    iconDescription: string;
+    kind: 'primary';
+  } = {
+    label: t('addProfile', 'Add Profile'),
+    onClick: handleCreateProfile,
+    icon: Add,
+    hasIconOnly: true,
+    iconDescription: t('addProfile', 'Add Profile'),
+    kind: 'primary',
+  };
 
   return (
     <div className={styles.syncProfilesContent}>
-      {profiles.length === 0 ? (
-        <div className={styles.emptyState}>
-          <Connect size={48} className={styles.emptyStateIcon} />
-          <h3 className={styles.emptyStateTitle}>
-            {t('noSyncProfiles', 'No Sync Profiles')}
-          </h3>
-          <p className={styles.emptyStateDescription}>
-            {t('noSyncProfilesDesc', 'Create your first FHIR sync profile to get started')}
-          </p>
-          <UserHasAccess privilege="Manage FHIR Profiles">
-            <Button kind="primary" onClick={handleCreateProfile} renderIcon={Add}>
-              {t('createFirstProfile', 'Create First Profile')}
-            </Button>
-          </UserHasAccess>
-        </div>
-      ) : (
-        <DataTable rows={tableRows} headers={tableHeaders}>
-          {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-            <TableContainer className={styles.syncTable}>
-              <TableToolbar>
-                <TableToolbarContent>
-                  <TableToolbarSearch
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event ? event.toString() : '')}
-                    placeholder={t('searchProfiles', 'Search profiles...')}
-                  />
-                  <UserHasAccess privilege="Manage FHIR Profiles">
-                    <Button
-                      kind="secondary"
-                      onClick={handleExportProfiles}
-                      renderIcon={Export}
-                      disabled={profiles.length === 0}
-                      hasIconOnly
-                      iconDescription={t('export', 'Export')}
-                      tooltipAlignment="end"
-                    >
-                      {t('export', 'Export')}
-                    </Button>
-                    <Button
-                      kind="primary"
-                      onClick={handleCreateProfile}
-                      renderIcon={Add}
-                      hasIconOnly
-                      iconDescription={t('addProfile', 'Add Profile')}
-                      tooltipAlignment="end"
-                    >
-                      {t('addProfile', 'Add Profile')}
-                    </Button>
-                  </UserHasAccess>
-                </TableToolbarContent>
-              </TableToolbar>
-              <Table {...getTableProps()}>
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableHeader {...getHeaderProps({ header })}>
-                        {header.header}
-                      </TableHeader>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow {...getRowProps({ row })}>
-                      {row.cells.map((cell) => (
-                        <TableCell key={cell.id}>{cell.value}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Pagination
-                forwardText="Next page"
-                backwardText="Previous page"
-                page={currentPage}
-                pageSize={currentPageSize}
-                pageSizes={pageSizes}
-                totalItems={filteredProfiles.length}
-                className={styles.pagination}
-                onChange={({ pageSize, page }) => {
-                  if (pageSize !== currentPageSize) {
-                    setPageSize(pageSize);
-                  }
-                  if (page !== currentPage) {
-                    goTo(page);
-                  }
-                }}
-              />
-            </TableContainer>
-          )}
-        </DataTable>
-      )}
+      <SystemAdminDataTable
+        columns={columns}
+        data={profiles}
+        isLoading={isLoading}
+        error={isError ? t('errorLoadingProfiles', 'Error loading sync profiles') : null}
+        searchPlaceholder={t('searchProfiles', 'Search profiles...')}
+        emptyState={{
+          title: t('noSyncProfiles', 'No Sync Profiles'),
+          description: t('noSyncProfilesDesc', 'Create your first FHIR sync profile to get started'),
+          icon: <Connect size={48} />,
+        }}
+        toolbarActions={[
+          ...toolbarActions,
+          ...(profiles.length > 0 ? [createButton] : []),
+        ]}
+        renderCell={renderCell}
+      />
 
       <ProfileDetailModal
         open={isModalOpen}

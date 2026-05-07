@@ -1,30 +1,30 @@
 export interface SyncTaskType {
   uuid: string;
   name: string;
-  description?: string;
-  taskEnabled: boolean;
-  taskType: string;
-  executionOrder?: number;
-  retryCount?: number;
-  retryInterval?: number;
-  lastExecutionDate?: string;
-  lastExecutionStatus?: 'success' | 'failed' | 'pending' | 'running';
-  executionFrequency?: string;
+  dataType?: string;
+  dataTypeId?: string;
+  url?: string;
+  urlToken?: string;
+  urlUserName?: string;
+  urlPassword?: string;
+  tokenExpiryDate?: string;
+  tokenType?: string;
+  tokenRefreshKey?: string;
 }
 
 export interface SyncTaskTypeFormData {
   name: string;
-  description?: string;
-  taskEnabled: boolean;
-  taskType: string;
-  executionOrder?: number;
-  retryCount?: number;
-  retryInterval?: number;
-  executionFrequency?: string;
+  dataType?: string;
+  dataTypeId?: string;
+  url?: string;
+  urlUserName?: string;
+  urlPassword?: string;
+  urlToken?: string;
+  tokenExpiryDate?: string;
+  tokenType?: string;
+  tokenRefreshKey?: string;
 }
 
 export interface SyncTaskTypeResponse {
   results: SyncTaskType[];
 }
-
-export type TaskExecutionStatus = 'success' | 'failed' | 'pending' | 'running';

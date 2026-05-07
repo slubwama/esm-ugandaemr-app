@@ -97,7 +97,8 @@ export async function deleteSyncTaskType(uuid: string) {
 }
 
 export async function toggleTaskTypeStatus(uuid: string, enabled: boolean) {
-  return updateSyncTaskType(uuid, { taskEnabled: enabled });
+  // taskEnabled is not a property in the backend API
+  throw new Error('Toggle task type status is not supported by the backend API');
 }
 
 export async function exportTaskTypes() {
@@ -137,5 +138,28 @@ export async function executeTaskType(uuid: string) {
     return response.data;
   } catch (error) {
     throw new Error(`Error executing task: ${error.message}`);
+  }
+}
+
+export async function runTaskByName(taskName: string) {
+  try {
+    const response = await openmrsFetch('/ws/rest/v1/taskaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        action: 'runtask',
+        tasks: [taskName],
+      },
+    });
+
+    if (response.status !== 201) {
+      throw new Error(`Task execution failed with status ${response.status}`);
+    }
+
+    return response.data;
+  } catch (error) {
+    throw new Error(`Error running task: ${error.message}`);
   }
 }

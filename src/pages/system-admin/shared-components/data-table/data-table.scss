@@ -1,0 +1,124 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/spacing';
+@use '@carbon/styles/scss/type';
+
+.tableContainer {
+  margin: 0;
+  padding: 0;
+
+  :global(.cds--data-table-content) {
+    border: 1px solid colors.$gray-20;
+    border-bottom: none;
+    overflow: visible;
+  }
+
+  :global(.cds--table-toolbar) {
+    position: relative;
+    height: 2rem;
+    min-height: 0;
+    overflow: visible;
+    top: 0;
+  }
+
+  &:global(.cds--data-table-container) {
+    padding-top: 0;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  tr {
+    width: spacing.$spacing-01;
+  }
+
+  :global(.cds--table-sort__description) {
+    display: none;
+  }
+}
+
+.toolbarWrapper {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toolbarContent {
+  width: 100%;
+}
+
+.searchbox {
+  max-width: 16rem;
+
+  input:focus {
+    outline: 2px solid colors.$orange-40 !important;
+  }
+}
+
+.toolbarAction {
+  max-width: none;
+}
+
+.tileContainer {
+  background-color: colors.$white-0;
+  border-top: 1px solid colors.$gray-20;
+  padding: 5rem 0;
+}
+
+.tile {
+  margin: auto;
+  width: fit-content;
+}
+
+.tileContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content {
+  @include type.type-style('body-01');
+  color: colors.$gray-70;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: spacing.$spacing-12 spacing.$spacing-05;
+  text-align: center;
+}
+
+.emptyStateIcon {
+  color: colors.$gray-40;
+  margin-bottom: spacing.$spacing-05;
+}
+
+.emptyStateTitle {
+  @include type.type-style('heading-02');
+  color: colors.$gray-100;
+  margin-bottom: spacing.$spacing-03;
+}
+
+.emptyStateDescription {
+  @include type.type-style('body-01');
+  color: colors.$gray-70;
+  max-width: 400px;
+}
+
+.pagination {
+  margin-top: spacing.$spacing-05;
+}
+
+.rowActions {
+  display: flex;
+  gap: spacing.$spacing-02;
+  align-items: center;
+}
+
+:global(.omrs-breakpoint-lt-desktop) {
+  .toolbarWrapper {
+    height: spacing.$spacing-09;
+  }
+}

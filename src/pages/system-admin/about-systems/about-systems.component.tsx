@@ -1,40 +1,30 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Column,
   Grid,
-  DataTable,
-  DataTableSkeleton,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
   Tile,
   Tabs,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
-  TableContainer,
-  TableToolbar,
-  TableToolbarContent,
-  TableToolbarSearch,
-  Pagination,
+  Tag,
+  InlineLoading,
 } from "@carbon/react";
 import {
   ErrorState,
   UserHasAccess,
   showNotification,
   showSnackbar,
-  usePagination,
 } from "@openmrs/esm-framework";
 import {
   updatePropertyValue,
   useGetSystemInformation,
   useRetrieveFacilityCode,
+  useGetModules,
 } from "./about-systems.resources";
+import SystemAdminDataTable from "../shared-components/data-table";
 import styles from "./about-systems.scss";
 import coatOfArms from "../../../images/coat_of_arms.png";
 import UpdateFacilityCode from "./update-facility-code-button.component";
@@ -100,154 +90,141 @@ const OverallSystemInfo = ({
 
 interface ModuleInfo {
   id: number;
+  uuid: string;
   module_name: string;
   version_number: string;
+  started: boolean;
+  startup_error_message?: string;
+  require_openmrs_version?: string;
+  aware_of_modules?: string[];
 }
 
-function SystemInfoTable({ moduleInfo, error, loading }): React.JSX.Element {
+function SystemInfoTable({ moduleInfo, error, loading }: {
+  moduleInfo: any;
+  error: any;
+  loading: boolean;
+}): React.JSX.Element {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = React.useState("");
 
-  const pageSizes = [10, 20, 30, 40, 50];
-  const [currentPageSize, setPageSize] = React.useState(10);
+  // Use the modules API
+  const { modules: detailedModules, isLoading: modulesLoading, isError: modulesError } = useGetModules();
 
-  const defineTableRows = (obj: any): ModuleInfo[] => {
+  const allModules = useMemo(() => {
+    if (detailedModules && detailedModules.length > 0) {
+      return detailedModules.map((mod, i) => ({
+        id: i,
+        uuid: mod.uuid,
+        module_name: mod.name || mod.moduleId,
+        version_number: mod.version,
+        started: mod.started,
+        startup_error_message: mod.startupErrorMessage,
+        require_openmrs_version: mod.requireOpenmrsVersion,
+        aware_of_modules: mod.awareOfModules,
+      }));
+    }
+    // Fallback to system info if modules API doesn't return data
     const arr: ModuleInfo[] = [];
-    Object.keys(obj).forEach((key, i) => {
-      if (key !== "SystemInfo.Module.repositoryPath") {
-        arr.push({
-          id: i,
-          module_name: key,
-          version_number: obj[key],
-        });
-      }
-    });
+    if (moduleInfo) {
+      Object.keys(moduleInfo).forEach((key, i) => {
+        if (key !== "SystemInfo.Module.repositoryPath") {
+          arr.push({
+            id: i,
+            uuid: '',
+            module_name: key,
+            version_number: moduleInfo[key],
+            started: true,
+            startup_error_message: undefined,
+            require_openmrs_version: undefined,
+            aware_of_modules: undefined,
+          });
+        }
+      });
+    }
     return arr;
-  };
+  }, [detailedModules, moduleInfo]);
 
-  const allModules = React.useMemo(
-    () => defineTableRows(moduleInfo),
-    [moduleInfo],
-  );
-
-  const filteredModules = React.useMemo(
-    () =>
-      allModules.filter((module) =>
-        module.module_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        module.version_number.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [allModules, searchQuery],
-  );
-
-  const {
-    goTo,
-    results: paginatedModules,
-    currentPage,
-  } = usePagination(filteredModules, currentPageSize);
-
-  const tableHeaders = [
-    {
-      header: t("moduleName", "Module Name"),
-      key: "module_name",
-    },
-    {
-      header: t("versionNumber", "Version Number"),
-      key: "version_number",
-    },
+  const columns = [
+    { key: 'module_name', header: t('moduleName', 'Module Name') },
+    { key: 'version_number', header: t('versionNumber', 'Version Number') },
+    { key: 'started', header: t('started', 'Started') },
+    { key: 'status_details', header: t('statusDetails', 'Status Details') },
   ];
 
-  const tableRows = React.useMemo(
-    () =>
-      paginatedModules.map((module: ModuleInfo) => ({
-        id: String(module.id),
-        module_name: module.module_name,
-        version_number: module.version_number,
-      })),
-    [paginatedModules],
-  );
+  const renderCell = (columnKey: string, row: ModuleInfo) => {
+    switch (columnKey) {
+      case 'module_name':
+        return (
+          <div className={styles.moduleNameContainer}>
+            <span className={styles.moduleName}>{row.module_name}</span>
+            {row.uuid && (
+              <span className={styles.moduleUuid}>{t('uuid', 'UUID')}: {row.uuid}</span>
+            )}
+          </div>
+        );
+      case 'started':
+        return row.started ? (
+          <Tag type="green">{t('yes', 'Yes')}</Tag>
+        ) : (
+          <Tag type="red">{t('no', 'No')}</Tag>
+        );
+      case 'status_details':
+        return (
+          <div className={styles.statusDetails}>
+            {row.startup_error_message && (
+              <div className={styles.errorDetail}>
+                <strong>{t('error', 'Error')}:</strong> {row.startup_error_message}
+              </div>
+            )}
+            {row.require_openmrs_version && (
+              <div className={styles.versionDetail}>
+                <strong>{t('requires', 'Requires')}:</strong> {row.require_openmrs_version}
+              </div>
+            )}
+            {!row.startup_error_message && !row.require_openmrs_version && (
+              <span className={styles.noDetails}>-</span>
+            )}
+          </div>
+        );
+      default:
+        return row[columnKey];
+    }
+  };
 
-  if (loading) {
+  const isLoadingData = loading || modulesLoading;
+  const hasError = error || modulesError;
+
+  if (isLoadingData) {
     return (
-      <DataTableSkeleton
-        className={styles["system-info-table"]}
-        role="progressbar"
-      />
+      <div className={styles.loadingContainer}>
+        <InlineLoading description={t('loadingModules', 'Loading modules...')} />
+      </div>
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <ErrorState
-        headerTitle={t(
-          "errorFetchingSytemInformation",
-          "Error fetching system information",
-        )}
-        error={error}
+        headerTitle={t('errorFetchingSytemInformation', 'Error fetching system information')}
+        error={hasError}
       />
     );
   }
 
-  if (moduleInfo && allModules.length === 0) {
+  if (allModules.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <p>{t("noModulesFound", "No modules found")}</p>
+        <p>{t('noModulesFound', 'No modules found')}</p>
       </div>
     );
   }
 
   return (
-    <DataTable rows={tableRows} headers={tableHeaders}>
-      {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
-        <TableContainer className={styles["system-info-table"]}>
-          <TableToolbar>
-            <TableToolbarContent>
-              <TableToolbarSearch
-                value={searchQuery}
-                onChange={(event, value) => setSearchQuery(value || "")}
-                placeholder={t("searchModules", "Search modules...")}
-              />
-            </TableToolbarContent>
-          </TableToolbar>
-          <Table {...getTableProps()}>
-            <TableHead>
-              <TableRow>
-                {headers.map((header) => (
-                  <TableHeader {...getHeaderProps({ header })}>
-                    {header.header}
-                  </TableHeader>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow {...getRowProps({ row })}>
-                  {row.cells.map((cell) => (
-                    <TableCell key={cell.id}>{cell.value}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pagination
-            forwardText={t("nextPage", "Next page")}
-            backwardText={t("previousPage", "Previous page")}
-            page={currentPage}
-            pageSize={currentPageSize}
-            pageSizes={pageSizes}
-            totalItems={filteredModules.length}
-            className={styles.pagination}
-            onChange={({ pageSize, page }) => {
-              if (pageSize !== currentPageSize) {
-                setPageSize(pageSize);
-              }
-              if (page !== currentPage) {
-                goTo(page);
-              }
-            }}
-          />
-        </TableContainer>
-      )}
-    </DataTable>
+    <SystemAdminDataTable
+      columns={columns}
+      data={allModules}
+      searchPlaceholder={t('searchModules', 'Search modules...')}
+      renderCell={renderCell}
+    />
   );
 }
 
@@ -257,8 +234,7 @@ const AboutSystemsPage = () => {
   const [buildInfo, setBuildInfo] = useState({});
   const [emrVersion, setEMRVersion] = useState("4.0");
   const { systemInfo, isError, isLoading } = useGetSystemInformation();
-  const [facilityCodeDetails, setFacilityCodeDetails] =
-    useState<FacilityCodeDetails>({ value: null });
+  const [facilityCodeDetails, setFacilityCodeDetails] = useState<FacilityCodeDetails>({ value: null });
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const { facilityIds } = useRetrieveFacilityCode();
@@ -279,19 +255,13 @@ const AboutSystemsPage = () => {
             isLowContrast: true,
             kind: "success",
             title: t("Updating Facility Code", "Updating Facility Code"),
-            subtitle: t(
-              "UpdatingFacilityCode",
-              `Updated Facility Code ${response?.value}`,
-            ),
+            subtitle: t("UpdatingFacilityCode", `Updated Facility Code ${response?.value}`),
             autoClose: true,
           });
         },
         (error) => {
           showNotification({
-            title: t(
-              "errorUpdatingFacilityCode",
-              "Could not update facility code",
-            ),
+            title: t("errorUpdatingFacilityCode", "Could not update facility code"),
             kind: "error",
             critical: true,
             description: error?.message,
@@ -315,9 +285,7 @@ const AboutSystemsPage = () => {
       };
       delete moduleInformation["SystemInfo.Module.repositoryPath"];
       setModuleInfo(moduleInformation);
-      setBuildInfo(
-        systemInfo["systemInfo"]["SystemInfo.title.openmrsInformation"],
-      );
+      setBuildInfo(systemInfo["systemInfo"]["SystemInfo.title.openmrsInformation"]);
     }
   }, [systemInfo]);
 
