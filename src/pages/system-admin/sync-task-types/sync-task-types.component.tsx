@@ -11,10 +11,19 @@ import {
 } from './sync-task-types.resources';
 import { type SyncTaskType } from './sync-task-types.types';
 import TaskTypeDetailModal from './tasktype-detail-modal.component';
+import Illustration from './sync-task-types-illustration.component';
+import { Header } from '../shared-components';
 import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './sync-task-types.scss';
 
-const SyncTaskTypesContent: React.FC = () => {
+interface SyncTaskTypesContentProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const SyncTaskTypesContent: React.FC<SyncTaskTypesContentProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const { taskTypes, isLoading, isError, mutate } = useSyncTaskTypes();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -178,8 +187,9 @@ const SyncTaskTypesContent: React.FC = () => {
   };
 
   return (
-    <div className={styles.syncTaskTypesContent}>
-      <SystemAdminDataTable
+    <>
+      <div className={styles.syncTaskTypesContent}>
+        <SystemAdminDataTable
         columns={columns}
         data={taskTypes}
         isLoading={isLoading}
@@ -203,7 +213,8 @@ const SyncTaskTypesContent: React.FC = () => {
         taskType={selectedTaskType}
         onSave={() => mutate()}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

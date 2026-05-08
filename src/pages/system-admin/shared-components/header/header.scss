@@ -1,0 +1,75 @@
+@use '@carbon/styles/scss/colors';
+@use '@carbon/styles/scss/type';
+@use '@carbon/styles/scss/spacing';
+
+.header {
+  @include type.type-style('body-compact-02');
+  color: colors.$gray-70;
+  height: spacing.$spacing-12;
+  background-color: colors.$white-0;
+  border-bottom: 1px solid colors.$gray-20;
+  display: flex;
+  justify-content: space-between;
+}
+
+.left-justified-items {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.right-justified-items {
+  @include type.type-style('body-compact-02');
+  color: colors.$gray-70;
+  margin: 0.5rem;
+}
+
+.page-name {
+  @include type.type-style('heading-04');
+}
+
+.page-labels {
+  p:first-of-type {
+    margin-bottom: 0.25rem;
+  }
+}
+
+.date-and-location {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.value {
+  margin-left: 0.25rem;
+}
+
+.middot {
+  margin: 0 0.5rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid colors.$gray-30;
+  border-radius: 4px;
+  color: colors.$gray-100;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: colors.$gray-10;
+    border-color: colors.$gray-50;
+  }
+
+  &:active {
+    background: colors.$gray-20;
+  }
+}

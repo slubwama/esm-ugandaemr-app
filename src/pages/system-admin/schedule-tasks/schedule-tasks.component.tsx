@@ -5,15 +5,27 @@ import { Calendar } from '@carbon/react/icons';
 import { showNotification, showSnackbar } from '@openmrs/esm-framework';
 import { useScheduledTasks, runTaskNow } from './schedule-tasks.resources';
 import { type ScheduledTask } from './schedule-tasks.types';
+import Illustration from './schedule-tasks-illustration.component';
+import { Header } from '../shared-components';
 import SystemAdminDataTable from '../shared-components/data-table';
 import styles from './schedule-tasks.scss';
 
-const ScheduleTasksContent: React.FC = () => {
+interface ScheduleTasksContentProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const ScheduleTasksContent: React.FC<ScheduleTasksContentProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const { tasks, isLoading, isError, mutate } = useScheduledTasks();
 
   const handleRunNow = useCallback(
-    async (task: ScheduledTask) => {
+    async (task: ScheduledTask, event?: React.MouseEvent | React.KeyboardEvent) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+
       try {
         await runTaskNow(task.name);
         showSnackbar({
@@ -77,7 +89,7 @@ const ScheduleTasksContent: React.FC = () => {
           <div className={styles.taskActions}>
             <OverflowMenuItem
               itemText={t('runNow', 'Run Now')}
-              onClick={() => handleRunNow(row)}
+              onClick={(e) => handleRunNow(row, e)}
             />
           </div>
         );
@@ -87,8 +99,14 @@ const ScheduleTasksContent: React.FC = () => {
   };
 
   return (
-    <div className={styles.scheduleTasksContent}>
-      <SystemAdminDataTable
+    <>
+      <Header
+        illustrationComponent={<Illustration />}
+        title={t('scheduleTaskManager', 'Schedule Task Manager')}
+        backButton={backButton}
+      />
+      <div className={styles.scheduleTasksContent}>
+        <SystemAdminDataTable
         columns={columns}
         data={tasks}
         isLoading={isLoading}
@@ -101,7 +119,8 @@ const ScheduleTasksContent: React.FC = () => {
         }}
         renderCell={renderCell}
       />
-    </div>
+      </div>
+    </>
   );
 };
 

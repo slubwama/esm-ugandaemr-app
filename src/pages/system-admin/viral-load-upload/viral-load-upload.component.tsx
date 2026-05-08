@@ -26,9 +26,18 @@ import {
 import {
   type ViralLoadUploadResponse,
 } from './viral-load-upload.types';
+import Illustration from './viral-load-upload-illustration.component';
+import { Header } from '../shared-components';
 import styles from './viral-load-upload.scss';
 
-const ViralLoadUploadContent: React.FC = () => {
+interface ViralLoadUploadContentProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const ViralLoadUploadContent: React.FC<ViralLoadUploadContentProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -154,19 +163,14 @@ const ViralLoadUploadContent: React.FC = () => {
   };
 
   return (
-    <div className={styles.viralLoadUploadContent}>
-      <div className={styles.uploadContainer}>
-        {/* Header */}
-        <div className={styles.uploadHeader}>
-          <h1>{t('viralLoadUpload', 'Viral Load Results Upload')}</h1>
-          <p className={styles.uploadDescription}>
-            {uploadResponse?.healthCenterName
-              ? t('viralLoadUploadDescWithFacility', 'Upload viral load test results from CPHL dashboard for {{facilityName}}', {
-                  facilityName: uploadResponse.healthCenterName,
-                })
-              : t('viralLoadUploadDesc', 'Upload viral load test results from CPHL dashboard')}
-          </p>
-        </div>
+    <>
+      <Header
+        illustrationComponent={<Illustration />}
+        title={t('viralLoadUpload', 'Viral Load Upload')}
+        backButton={backButton}
+      />
+      <div className={styles.viralLoadUploadContent}>
+        <div className={styles.uploadContainer}>
 
         {/* Error Notification */}
         {uploadError && (
@@ -393,8 +397,9 @@ const ViralLoadUploadContent: React.FC = () => {
             )}
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -116,6 +116,60 @@
       }
     },
     {
+      "name": "system-admin-dashboard-link",
+      "component": "systemAdminDashboardLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 0
+    },
+    {
+      "name": "sync-profiles-link",
+      "component": "syncProfilesLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 1
+    },
+    {
+      "name": "sync-task-types-link",
+      "component": "syncTaskTypesLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 2
+    },
+    {
+      "name": "schedule-tasks-link",
+      "component": "scheduleTasksLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 3
+    },
+    {
+      "name": "cohort-management-link",
+      "component": "cohortManagementLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 4
+    },
+    {
+      "name": "viral-load-upload-link",
+      "component": "viralLoadUploadLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 5
+    },
+    {
+      "name": "sms-settings-link",
+      "component": "smsSettingsLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 6
+    },
+    {
+      "name": "system-upgrades-link",
+      "component": "systemUpgradesLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 7
+    },
+    {
+      "name": "about-systems-link",
+      "component": "aboutSystemsLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 8
+    },
+    {
       "name": "app-search-button",
       "component": "appMenuButton",
       "slot": "top-nav-actions-slot",

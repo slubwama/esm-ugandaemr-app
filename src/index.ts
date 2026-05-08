@@ -62,7 +62,7 @@ export function startupApp() {
 }
 
 export const systemAdminPage = getAsyncLifecycle(
-  () => import("./pages/system-admin/system-admin.component"),
+  () => import("./pages/system-admin/root.component"),
   {
     featureName: "system admin page",
     moduleName,
@@ -147,3 +147,16 @@ export const notificationsMenuButton = getSyncLifecycle(
   NotificationsMenuButton,
   options,
 );
+
+// System Admin left panel links - re-exported from system-admin module
+export {
+  systemAdminDashboardLink,
+  syncProfilesLink,
+  syncTaskTypesLink,
+  scheduleTasksLink,
+  cohortManagementLink,
+  viralLoadUploadLink,
+  smsSettingsLink,
+  systemUpgradesLink,
+  aboutSystemsLink,
+} from "./pages/system-admin";

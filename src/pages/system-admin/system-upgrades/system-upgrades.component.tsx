@@ -10,11 +10,18 @@ import { Play, Renew, Warning } from '@carbon/react/icons';
 import { showNotification, showToast } from '@openmrs/esm-framework';
 import { useUpgradeTasks } from './system-upgrades.resources';
 import { type UpgradeTask } from './system-upgrades.types';
+import Illustration from './system-upgrades-illustration.component';
+import { Header } from '../shared-components';
 import styles from './system-upgrades.scss';
 
-interface UpgradeTasksContentProps {}
+interface UpgradeTasksContentProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
 
-const UpgradeTasksContent: React.FC<UpgradeTasksContentProps> = () => {
+const UpgradeTasksContent: React.FC<UpgradeTasksContentProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const { fetchUpgradeTasks, executeUpgradeTask } = useUpgradeTasks();
 
@@ -145,24 +152,18 @@ const UpgradeTasksContent: React.FC<UpgradeTasksContentProps> = () => {
   }
 
   return (
-    <div className={styles.systemUpgradesContent}>
-      <div className={styles.upgradeHeader}>
-        <div className={styles.headerLeft}>
-          <Renew size={48} className={styles.headerIcon} />
-          <div>
-            <h2 className={styles.pageTitle}>{t('systemUpgrade', 'System Upgrade')}</h2>
-            <p className={styles.pageDescription}>
-              {t(
-                'systemUpgradeDescription',
-                'Execute upgrade tasks to keep your EMR system up to date with the latest forms, concepts, and components'
-              )}
-            </p>
-          </div>
+    <>
+      <Header
+        illustrationComponent={<Illustration />}
+        title={t('systemUpgrades', 'System Updates & Upgrades')}
+        backButton={backButton}
+      />
+      <div className={styles.systemUpgradesContent}>
+        <div className={styles.upgradeHeader}>
+          <Button kind="tertiary" renderIcon={Renew} onClick={handleRefresh} disabled={isLoading}>
+            {isLoading ? t('loading', 'Loading...') : t('refresh', 'Refresh')}
+          </Button>
         </div>
-        <Button kind="tertiary" renderIcon={Renew} onClick={handleRefresh} disabled={isLoading}>
-          {isLoading ? t('loading', 'Loading...') : t('refresh', 'Refresh')}
-        </Button>
-      </div>
 
       <div className={styles.upgradeTasksGrid}>
         {tasks.length === 0 ? (
@@ -244,7 +245,8 @@ const UpgradeTasksContent: React.FC<UpgradeTasksContentProps> = () => {
           </ul>
         </Tile>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

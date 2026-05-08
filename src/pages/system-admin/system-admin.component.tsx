@@ -1,202 +1,107 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Connect,
   Settings,
   Calendar,
   ChevronRight,
-  Document,
   Mobile,
-  Dashboard,
   Upload,
   Group,
   Renew,
   Information,
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
-import SyncProfilesContent from './sync-profiles';
-import SyncTaskTypesContent from './sync-task-types';
-import ScheduleTasksContent from './schedule-tasks/schedule-tasks.component';
-import SMSSettingsContent from './sms-settings';
-import ViralLoadUploadContent from './viral-load-upload/viral-load-upload.component';
-import CohortManagementContent from './cohort-management';
-import SystemUpgradesContent from './system-upgrades';
-import AboutSystemsContent from './about-systems/about-systems.component';
 
-type AdminSection =
-  | 'overview'
-  | 'sync-profiles'
-  | 'sync-task-types'
-  | 'schedule-tasks'
-  | 'cohort-management'
-  | 'viral-load-upload'
-  | 'sms-settings'
-  | 'about-systems'
-  | 'system-upgrades';
-
-const SystemAdminPage: React.FC = () => {
+const SystemAdminDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const [activeSection, setActiveSection] = useState<AdminSection>('overview');
 
   const navItems = [
     {
-      id: 'sync-profiles' as AdminSection,
+      id: 'sync-profiles',
       label: t('syncProfiles', 'Sync Profiles'),
       description: t('syncProfilesDesc', 'Configure and manage FHIR sync profiles'),
       icon: Connect,
+      path: '/system-admin/sync-profiles',
     },
     {
-      id: 'sync-task-types' as AdminSection,
+      id: 'sync-task-types',
       label: t('syncTaskTypes', 'Sync Task Types'),
       description: t('syncTaskTypesDesc', 'Manage sync task types and view execution history'),
       icon: Settings,
+      path: '/system-admin/sync-task-types',
     },
     {
-      id: 'schedule-tasks' as AdminSection,
+      id: 'schedule-tasks',
       label: t('scheduleTaskManager', 'Schedule Task Manager'),
       description: t('scheduleTaskManagerDesc', 'Schedule and automate recurring tasks'),
       icon: Calendar,
+      path: '/system-admin/schedule-tasks',
     },
     {
-      id: 'cohort-management' as AdminSection,
+      id: 'cohort-management',
       label: t('cohortManagement', 'Cohort Management'),
       description: t('cohortManagementDesc', 'Manage DSD refill groups and patient enrollment'),
       icon: Group,
+      path: '/system-admin/cohort-management',
     },
     {
-      id: 'viral-load-upload' as AdminSection,
+      id: 'viral-load-upload',
       label: t('viralLoadUpload', 'Viral Load Upload'),
       description: t('viralLoadUploadDesc', 'Upload viral load test results from CPHL'),
       icon: Upload,
+      path: '/system-admin/viral-load-upload',
     },
     {
-      id: 'sms-settings' as AdminSection,
+      id: 'sms-settings',
       label: t('sms', 'SMS'),
       description: t('smsDesc', 'Configure SMS gateway and view sent message logs'),
       icon: Mobile,
+      path: '/system-admin/sms-settings',
     },
     {
-      id: 'system-upgrades' as AdminSection,
+      id: 'system-upgrades',
       label: t('systemUpgrades', 'System Updates & Upgrades'),
       description: t('systemUpgradesDesc', 'Execute system upgrades and update EMR components'),
       icon: Renew,
+      path: '/system-admin/system-upgrades',
     },
     {
-      id: 'about-systems' as AdminSection,
+      id: 'about-systems',
       label: t('aboutSystems', 'About Systems'),
       description: t('aboutSystemsDesc', 'View system information, version details, and facility code'),
       icon: Information,
+      path: '/system-admin/about-systems',
     },
   ];
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'sync-profiles':
-        return <SyncProfilesContent />;
-      case 'sync-task-types':
-        return <SyncTaskTypesContent />;
-      case 'schedule-tasks':
-        return <ScheduleTasksContent />;
-      case 'cohort-management':
-        return <CohortManagementContent />;
-      case 'viral-load-upload':
-        return <ViralLoadUploadContent />;
-      case 'sms-settings':
-        return <SMSSettingsContent />;
-      case 'system-upgrades':
-        return <SystemUpgradesContent />;
-      case 'about-systems':
-        return <AboutSystemsContent />;
-      default:
-        return (
-          <div className={styles.overviewContent}>
-            <div className={styles.overviewHeader}>
-              <h2>{t('systemAdmin', 'System Administration')}</h2>
-              <p>{t('systemAdminDesc', 'Manage system configuration, sync operations, and scheduled tasks')}</p>
-            </div>
-            <div className={styles.overviewCards}>
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.id}
-                    className={styles.overviewCard}
-                    onClick={() => setActiveSection(item.id)}
-                  >
-                    <div className={styles.cardIcon}>
-                      <Icon size={32} />
-                    </div>
-                    <h3>{item.label}</h3>
-                    <p>{item.description}</p>
-                    <ChevronRight size={20} className={styles.cardArrow} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-    }
-  };
-
   return (
-    <div className={styles.adminLayout}>
-      <div className={styles.adminSidebar}>
-        <div className={styles.sidebarHeader}>
-          <h2>{t('systemAdmin', 'System Admin')}</h2>
-        </div>
-        <nav className={styles.sidebarNav}>
-          {/* Sync Dashboard - Links to overview */}
-          <button
-            className={`${styles.navItem} ${activeSection === 'overview' ? styles.active : ''}`}
-            onClick={() => setActiveSection('overview')}
-          >
-            <Dashboard size={20} className={styles.navIcon} />
-            <div className={styles.navContent}>
-              <span className={styles.navLabel}>{t('syncDashboard', 'Sync Dashboard')}</span>
-              <span className={styles.navDescription}>
-                {t('syncDashboardDesc', 'Overview of sync operations and monitoring')}
-              </span>
-            </div>
-            {activeSection === 'overview' && <ChevronRight size={16} className={styles.navArrow} />}
-          </button>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <Icon size={20} className={styles.navIcon} />
-                <div className={styles.navContent}>
-                  <span className={styles.navLabel}>{item.label}</span>
-                  <span className={styles.navDescription}>{item.description}</span>
-                </div>
-                {isActive && <ChevronRight size={16} className={styles.navArrow} />}
-              </button>
-            );
-          })}
-        </nav>
+    <div className={styles.dashboardContainer}>
+      <div className={styles.dashboardHeader}>
+        <h2>{t('systemAdmin', 'System Administration')}</h2>
+        <p>{t('systemAdminDesc', 'Manage system configuration, sync operations, and scheduled tasks')}</p>
       </div>
-      <div className={styles.adminContent}>
-        <div className={styles.contentHeader}>
-          {activeSection !== 'overview' && (
-            <button
-              className={styles.backButton}
-              onClick={() => setActiveSection('overview')}
+      <div className={styles.dashboardCards}>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <a
+              key={item.id}
+              className={styles.dashboardCard}
+              href={item.path}
             >
-              ← {t('backToOverview', 'Back to Overview')}
-            </button>
-          )}
-          <h1>{navItems.find(item => item.id === activeSection)?.label || t('systemAdmin', 'System Admin')}</h1>
-        </div>
-        <div className={styles.contentBody}>
-          {renderContent()}
-        </div>
+              <div className={styles.cardIcon}>
+                <Icon size={32} />
+              </div>
+              <h3>{item.label}</h3>
+              <p>{item.description}</p>
+              <ChevronRight size={20} className={styles.cardArrow} />
+            </a>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-export default SystemAdminPage;
+export default SystemAdminDashboard;

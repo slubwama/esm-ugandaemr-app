@@ -24,6 +24,8 @@ import {
   useRetrieveFacilityCode,
   useGetModules,
 } from "./about-systems.resources";
+import Illustration from "./about-systems-illustration.component";
+import { Header } from "../shared-components";
 import SystemAdminDataTable from "../shared-components/data-table";
 import styles from "./about-systems.scss";
 import coatOfArms from "../../../images/coat_of_arms.png";
@@ -209,7 +211,14 @@ function SystemInfoTable({ moduleInfo, error, loading }: {
   );
 }
 
-const AboutSystemsPage = () => {
+interface AboutSystemsPageProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const AboutSystemsPage: React.FC<AboutSystemsPageProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const [moduleInfo, setModuleInfo] = useState({});
   const [buildInfo, setBuildInfo] = useState({});
@@ -277,33 +286,40 @@ const AboutSystemsPage = () => {
   }, [moduleInfo]);
 
   return (
-    <Tabs selectedIndex={selectedTabIndex} onChange={({ selectedIndex }) => setSelectedTabIndex(selectedIndex)}>
-      <TabList aria-label="About system tabs">
-        <Tab>{t("systemInfo", "System Information")}</Tab>
-        <Tab>{t("modules", "Modules")}</Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel>
-          <Tile>
-            <OverallSystemInfo
-              buildInfo={buildInfo}
-              emrVersion={emrVersion}
-              facilityCodeDetails={facilityCodeDetails}
-              setFacilityCodeDetails={setFacilityCodeDetails}
-            />
-          </Tile>
-        </TabPanel>
-        <TabPanel>
-          <Tile>
-            <SystemInfoTable
-              moduleInfo={moduleInfo}
-              error={isError}
-              loading={isLoading}
-            />
-          </Tile>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+    <>
+      <Header
+        illustrationComponent={<Illustration />}
+        title={t('aboutSystems', 'About Systems')}
+        backButton={backButton}
+      />
+      <Tabs selectedIndex={selectedTabIndex} onChange={({ selectedIndex }) => setSelectedTabIndex(selectedIndex)}>
+        <TabList aria-label="About system tabs">
+          <Tab>{t("systemInfo", "System Information")}</Tab>
+          <Tab>{t("modules", "Modules")}</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <Tile>
+              <OverallSystemInfo
+                buildInfo={buildInfo}
+                emrVersion={emrVersion}
+                facilityCodeDetails={facilityCodeDetails}
+                setFacilityCodeDetails={setFacilityCodeDetails}
+              />
+            </Tile>
+          </TabPanel>
+          <TabPanel>
+            <Tile>
+              <SystemInfoTable
+                moduleInfo={moduleInfo}
+                error={isError}
+                loading={isLoading}
+              />
+            </Tile>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </>
   );
 };
 

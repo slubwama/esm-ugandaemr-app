@@ -31,9 +31,18 @@ import {
   testSMSConnection,
 } from './sms-settings.resources';
 import { type SMSSettings } from './sms-settings.types';
+import Illustration from './sms-settings-illustration.component';
+import { Header } from '../shared-components';
 import styles from './sms-settings.scss';
 
-const SMSSettingsContent: React.FC = () => {
+interface SMSSettingsContentProps {
+  backButton?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const SMSSettingsContent: React.FC<SMSSettingsContentProps> = ({ backButton }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const { smsSettings, isLoading, isError, mutate } = useSMSSettings();
@@ -124,8 +133,14 @@ const SMSSettingsContent: React.FC = () => {
   }
 
   return (
-    <div className={styles.smsSettingsContent}>
-      <div className={styles.settingsContainer}>
+    <>
+      <Header
+        illustrationComponent={<Illustration />}
+        title={t('sms', 'SMS')}
+        backButton={backButton}
+      />
+      <div className={styles.smsSettingsContent}>
+        <div className={styles.settingsContainer}>
         {/* Appointment Reminder Settings */}
         <Tile className={styles.settingsSection}>
           <div className={styles.sectionHeader}>
@@ -333,8 +348,9 @@ const SMSSettingsContent: React.FC = () => {
             {isSaving ? t('saving', 'Saving...') : t('saveSettings', 'Save Settings')}
           </Button>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
