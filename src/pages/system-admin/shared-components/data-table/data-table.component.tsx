@@ -189,10 +189,11 @@ const SystemAdminDataTable: React.FC<DataTableProps> = ({
             <TableBody>
               {rows.map((row) => {
                 const rowData = data.find((d) => (d.id || d.uuid) === row.id);
+                if (!rowData) return null;
                 return (
                   <TableRow
                     key={row.id}
-                    onClick={() => onRowClick && rowData && onRowClick(rowData)}
+                    onClick={() => onRowClick && onRowClick(rowData)}
                     style={{ cursor: onRowClick ? 'pointer' : 'default' }}
                   >
                     {row.cells.map((cell) => {

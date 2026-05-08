@@ -147,7 +147,6 @@ function SystemInfoTable({ moduleInfo, error, loading }: {
     { key: 'module_name', header: t('moduleName', 'Module Name') },
     { key: 'version_number', header: t('versionNumber', 'Version Number') },
     { key: 'started', header: t('started', 'Started') },
-    { key: 'status_details', header: t('statusDetails', 'Status Details') },
   ];
 
   const renderCell = (columnKey: string, row: ModuleInfo) => {
@@ -166,24 +165,6 @@ function SystemInfoTable({ moduleInfo, error, loading }: {
           <Tag type="green">{t('yes', 'Yes')}</Tag>
         ) : (
           <Tag type="red">{t('no', 'No')}</Tag>
-        );
-      case 'status_details':
-        return (
-          <div className={styles.statusDetails}>
-            {row.startup_error_message && (
-              <div className={styles.errorDetail}>
-                <strong>{t('error', 'Error')}:</strong> {row.startup_error_message}
-              </div>
-            )}
-            {row.require_openmrs_version && (
-              <div className={styles.versionDetail}>
-                <strong>{t('requires', 'Requires')}:</strong> {row.require_openmrs_version}
-              </div>
-            )}
-            {!row.startup_error_message && !row.require_openmrs_version && (
-              <span className={styles.noDetails}>-</span>
-            )}
-          </div>
         );
       default:
         return row[columnKey];
