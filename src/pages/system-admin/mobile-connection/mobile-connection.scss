@@ -1,0 +1,132 @@
+.container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  > svg {
+    color: #0f62fe;
+    flex-shrink: 0;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    color: #525252;
+    font-size: 0.875rem;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.qrSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 2rem;
+
+  .qrCodeContainer {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+  }
+
+  .scanHint {
+    color: #525252;
+    font-size: 0.875rem;
+    text-align: center;
+    margin: 0;
+  }
+}
+
+.urlSection {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+
+  .urlHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    svg {
+      color: #0f62fe;
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      margin: 0;
+    }
+  }
+
+  .urlInputContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .urlInput {
+    flex: 1;
+  }
+
+  .copiedMessage {
+    color: #0f62fe;
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0 0;
+  }
+}
+
+.infoSection {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+
+  h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #161616;
+  }
+
+  .stepsList {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #525252;
+    font-size: 0.875rem;
+    line-height: 1.75;
+
+    li {
+      margin-bottom: 0.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
