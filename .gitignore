@@ -77,10 +77,12 @@ dist/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+!.yarn/install-state.gz
 
 .vscode/
 .turbo/
 
 node_modules/
+
 
 .idea
