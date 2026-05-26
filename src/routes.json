@@ -158,22 +158,28 @@
       "order": 6
     },
     {
+      "name": "mobile-connection-link",
+      "component": "mobileConnectionLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 7
+    },
+    {
+      "name": "location-management-link",
+      "component": "locationManagementLink",
+      "slot": "system-admin-left-panel-slot",
+      "order": 8
+    },
+    {
       "name": "system-upgrades-link",
       "component": "systemUpgradesLink",
       "slot": "system-admin-left-panel-slot",
-      "order": 7
+      "order": 9
     },
     {
       "name": "about-systems-link",
       "component": "aboutSystemsLink",
       "slot": "system-admin-left-panel-slot",
-      "order": 8
-    },
-    {
-      "name": "mobile-connection-link",
-      "component": "mobileConnectionLink",
-      "slot": "system-admin-left-panel-slot",
-      "order": 9
+      "order": 10
     },
     {
       "name": "app-search-button",
