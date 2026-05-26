@@ -1,0 +1,168 @@
+.hierarchyTree {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
+}
+
+.treeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.treeNode {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &:not(:last-child) {
+    margin-bottom: 16px;
+  }
+
+  // Level-specific indentation
+  &.level0 {
+    margin-left: 0;
+  }
+
+  &.level1 {
+    margin-left: 24px;
+  }
+
+  &.level2 {
+    margin-left: 48px;
+  }
+
+  &.level3 {
+    margin-left: 72px;
+  }
+
+  &.level4 {
+    margin-left: 96px;
+  }
+}
+
+.nodeContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  position: relative;
+  z-index: 2;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    border-color: #0f62fe;
+    box-shadow: 0 2px 8px rgba(15, 98, 254, 0.15);
+  }
+}
+
+// Root node styling
+.level0 > .nodeContent {
+  background: #f8f9fa;
+  border-color: #c6c6c6;
+  font-weight: 600;
+}
+
+.nodeIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #d0e2ff;
+  color: #0f62fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .level1 > .nodeContent & {
+    background: #defbe6;
+    color: #198038;
+  }
+
+  .level2 > .nodeContent & {
+    background: #ffd6a8;
+    color: #e8750a;
+  }
+
+  .level3 > .nodeContent & {
+    background: #eaddff;
+    color: #8a3ffc;
+  }
+}
+
+.nodeName {
+  font-weight: 500;
+  color: #161616;
+
+  .level0 > .nodeContent & {
+    font-weight: 600;
+  }
+}
+
+.childCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: #f8f9fa;
+  border-radius: 11px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #525252;
+  margin-left: auto;
+}
+
+.childrenContainer {
+  margin-top: 12px;
+  position: relative;
+
+  // Vertical line connecting parent to children
+  &::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0;
+    bottom: 12px;
+    width: 2px;
+    background: #a8a8a8;
+  }
+}
+
+.treeNode > .childrenContainer > .treeNode {
+  position: relative;
+
+  // Horizontal line from vertical line to child node
+  &::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 22px;
+    width: 12px;
+    height: 2px;
+    background: #a8a8a8;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #525252;
+  font-size: 14px;
+  gap: 12px;
+
+  svg {
+    color: #a8a8a8;
+  }
+}

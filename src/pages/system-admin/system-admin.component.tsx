@@ -12,6 +12,7 @@ import {
   Renew,
   Information,
   QrCode,
+  Location,
 } from '@carbon/react/icons';
 import styles from './system-admin.scss';
 
@@ -82,6 +83,13 @@ const SystemAdminDashboard: React.FC = () => {
       description: t('mobileConnectionDesc', 'Connect your mobile device to access this system'),
       icon: QrCode,
       path: '/mobile-connection',
+    },
+    {
+      id: 'location-management',
+      label: t('locationManagement', 'Location Management'),
+      description: t('locationManagementDesc', 'Manage and organize health center location hierarchy'),
+      icon: Location,
+      path: '/location-management',
     },
   ];
 
