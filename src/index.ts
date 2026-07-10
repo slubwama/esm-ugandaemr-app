@@ -157,6 +157,8 @@ export {
   cohortManagementLink,
   viralLoadUploadLink,
   smsSettingsLink,
+  mobileConnectionLink,
+  locationManagementLink,
   systemUpgradesLink,
   aboutSystemsLink,
 } from "./pages/system-admin";
