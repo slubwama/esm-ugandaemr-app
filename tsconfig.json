@@ -26,6 +26,7 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "node_modules/@openmrs/esm-globals/src"
   ]
 }
