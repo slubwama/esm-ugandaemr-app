@@ -116,6 +116,22 @@
       }
     },
     {
+      "name": "report-builder-app-menu-item",
+      "component": "reportBuilderAppMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Report Builder"
+      }
+    },
+    {
+      "name": "run-reports-menu-item",
+      "component": "runReportsMenuItem",
+      "slot": "app-menu-item-slot",
+      "meta": {
+        "name": "Run Reports"
+      }
+    },
+    {
       "name": "system-admin-dashboard-link",
       "component": "systemAdminDashboardLink",
       "slot": "system-admin-left-panel-slot",

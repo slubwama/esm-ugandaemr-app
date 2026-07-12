@@ -14,6 +14,8 @@ import formRenderTestAppMenu from "./menu-app-items/form-render-test-item/form-r
 import dispensingAppMenu from "./menu-app-items/despensing-app-menu-item/dispensing-app-menu-item.component";
 import bedManagementAppMenu from "./menu-app-items/bed-mgt-item/bed-mgt.component";
 import suppliesDispensingAppMenu from "./menu-app-items/supply-dispensing-app-item/supply-dispensing.component";
+import reportBuilderAppMenu from "./menu-app-items/report-builder-item/report-builder-item.component";
+import runReportsMenu from "./menu-app-items/run-reports-item/run-reports-item.component";
 import { createHomeDashboardLink } from "./create-dashboard-link";
 
 import ClinicalPatientSummary from "./pages/clinical-patient-summary/clinical-patient-summary.component";
@@ -48,6 +50,8 @@ export const formRenderTestAppMenuItem = getSyncLifecycle(formRenderTestAppMenu,
 export const dispensingAppMenuItem = getSyncLifecycle(dispensingAppMenu, options);
 export const bedManagementMenuItem = getSyncLifecycle(bedManagementAppMenu, options);
 export const suppliesDispensingMenuItem = getSyncLifecycle(suppliesDispensingAppMenu, options);
+export const reportBuilderAppMenuItem = getSyncLifecycle(reportBuilderAppMenu, options);
+export const runReportsMenuItem = getSyncLifecycle(runReportsMenu, options);
 
 export function startupApp() {
   defineConfigSchema(moduleName, configSchema);
